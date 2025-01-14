@@ -1,0 +1,14 @@
+{
+  "name": "desktopapp",
+  "version": "1.0.0",
+  "description": "Tracker App",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "Jaime",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^34.0.0"
+  }
+}
