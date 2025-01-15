@@ -1,6 +1,7 @@
 const { ipcRenderer } = require('electron');
 const ColorWidget = require('./widgets/colorWidget');
 const WeatherWidget = require('./widgets/weatherWidget');
+const HabitTracker = require('./widgets/habitTracker');
 
 async function updateColor() {
     const color = await ipcRenderer.invoke('get-daily-color');
@@ -18,6 +19,8 @@ async function updateColor() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('ipcRenderer in renderer.js:', ipcRenderer); // Debug line
     new ColorWidget('colorWidget');
     new WeatherWidget('weatherWidget');
+    const habitTracker = new HabitTracker('habitWidget', ipcRenderer);
 });

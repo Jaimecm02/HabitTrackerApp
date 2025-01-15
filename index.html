@@ -2,16 +2,18 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'">
-    <title>Daily Color Generator</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'">
+    <title>HabitTracker</title>
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
     <div class="container">
-      <h1>Daily Dashboard</h1>
+      <h1>Daily Dashboard 2025</h1>
       <div class="widgets-grid">
+        <div id="habitWidget"></div>
         <div id="colorWidget"></div>
         <div id="weatherWidget"></div>
+
       </div>
     </div>
     <script src="renderer.js"></script>
