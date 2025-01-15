@@ -2,16 +2,18 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'">
     <title>Daily Color Generator</title>
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
-    <h1>Daily Color Generator</h1>
-    <div class="color-box" id="colorBox"></div>
-    <p>Today's Color: <span id="colorValue"></span></p>
-    <div id="root"></div>
+    <div class="container">
+      <h1>Daily Dashboard</h1>
+      <div class="widgets-grid">
+        <div id="colorWidget"></div>
+        <div id="weatherWidget"></div>
+      </div>
+    </div>
     <script src="renderer.js"></script>
   </body>
 </html>
