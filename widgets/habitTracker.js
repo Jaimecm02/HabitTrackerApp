@@ -124,19 +124,29 @@ class HabitTracker {
         return streak;
     }
 
+    getStreakLevel(streak) {
+        if (streak >= 365) return 'streak-diamond';
+        if (streak >= 180) return 'streak-platinum';
+        if (streak >= 90) return 'streak-gold';
+        if (streak >= 30) return 'streak-silver';
+        if (streak >= 7) return 'streak-bronze';
+        return '';
+    }
+
     createHabitElement(habit) {
         const habitDiv = document.createElement('div');
         habitDiv.className = 'habit-item';
         
         const yearGrid = this.createYearGrid(habit);
         const currentStreak = this.calculateStreak(habit.dates);
+        const streakLevel = this.getStreakLevel(currentStreak);
         
         habitDiv.innerHTML = `
             <div class="habit-header">
                 <div class="habit-left">
                     <span class="habit-color" style="background-color: ${habit.color}"></span>
                     <h3 class="habit-title">${habit.name}</h3>
-                    <span class="streak-count">🔥 ${currentStreak} day${currentStreak !== 1 ? 's' : ''}</span>
+                    <span class="streak-count ${streakLevel}">${currentStreak} day${currentStreak !== 1 ? 's' : ''}</span>
                 </div>
                 <div class="habit-buttons">
                     <button class="complete-today-btn">Complete Today</button>
