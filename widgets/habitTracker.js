@@ -98,17 +98,45 @@ class HabitTracker {
         });
     }
 
+    calculateStreak(dates) {
+        if (!dates || dates.length === 0) return 0;
+        
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const sortedDates = [...dates].sort((a, b) => new Date(b) - new Date(a));
+        let streak = 0;
+        let currentDate = today;
+
+        for (const date of sortedDates) {
+            const habitDate = new Date(date);
+            habitDate.setHours(0, 0, 0, 0);
+
+            // Break streak if we miss a day
+            if ((currentDate - habitDate) / (1000 * 60 * 60 * 24) > 1) {
+                break;
+            }
+
+            streak++;
+            currentDate = habitDate;
+        }
+
+        return streak;
+    }
+
     createHabitElement(habit) {
         const habitDiv = document.createElement('div');
         habitDiv.className = 'habit-item';
         
         const yearGrid = this.createYearGrid(habit);
+        const currentStreak = this.calculateStreak(habit.dates);
         
         habitDiv.innerHTML = `
             <div class="habit-header">
                 <div class="habit-left">
                     <span class="habit-color" style="background-color: ${habit.color}"></span>
                     <h3 class="habit-title">${habit.name}</h3>
+                    <span class="streak-count">🔥 ${currentStreak} day${currentStreak !== 1 ? 's' : ''}</span>
                 </div>
                 <div class="habit-buttons">
                     <button class="complete-today-btn">Complete Today</button>

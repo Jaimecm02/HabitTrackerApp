@@ -113,7 +113,6 @@ h1 {
     font-size: 1.4rem;
 }
 
-/* Habit Tracker Styles */
 .habit-tracker {
     background: var(--card-bg);
     padding: 2rem;
@@ -415,6 +414,17 @@ h1 {
 
 .day-cell.today:hover {
     transform: scale(1.2);
+}
+
+.streak-count {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    background: #363636;
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
 }
 
 /* Add responsive adjustments */
