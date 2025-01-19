@@ -7,26 +7,6 @@ h1 {
     text-align: center;
 }
 
-.info-card, .widget-card, .habit-tracker {
-    background: var(--card-bg);
-    padding: 1.5rem;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
-}
-
-.info-card h2, .widget-card h2, .habit-header h3 {
-    margin-top: 0;
-    color: var(--text-color);
-}
-
-.widget-card {
-    transition: transform 0.2s ease;
-}
-
-.widget-card:hover {
-    transform: translateY(-2px);
-}
-
 .habit-form {
     display: flex;
     gap: 1rem;

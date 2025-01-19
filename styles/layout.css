@@ -10,30 +10,6 @@ body {
     text-align: center;
 }
 
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-    background: var(--card-bg);
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
-}
-
-.info-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-    margin-top: 2rem;
-}
-
-.widgets-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    padding: 1rem;
-    width: 100%;
-}
-
 .year-grid {
     display: grid;
     grid-template-columns: repeat(53, 1fr);
@@ -56,14 +32,6 @@ body {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-    .info-container {
-        grid-template-columns: 1fr;
-    }
-    
-    .container {
-        padding: 1rem;
-    }
-    
     .year-grid {
         gap: 2px;
         padding: 0.5rem;
