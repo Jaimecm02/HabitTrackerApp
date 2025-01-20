@@ -1,9 +1,9 @@
 :root {
-    --primary-bg: #1a1a1a;
-    --card-bg: #2d2d2d;
+    --primary-bg: #121212;
+    --card-bg: #1a1a1a;
     --text-color: #e0e0e0;
-    --text-secondary: #b0b0b0;
+    --text-secondary: #a0a0a0;
     --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    --border-radius: 12px;
+    --border-radius: 8px;
     --success-color: #2ecc71;
 }

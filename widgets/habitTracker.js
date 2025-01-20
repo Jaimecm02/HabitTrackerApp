@@ -13,7 +13,7 @@ class HabitTracker {
         console.log('Initializing HabitTracker');
         this.container.innerHTML = `
             <div class="habit-tracker">
-                <h2>Habit Tracker</h2>
+                <h2>HABIT TRACKER</h2>
                 <div class="habit-form">
                     <input type="text" id="habitName" placeholder="Habit name">
                     <input type="color" id="habitColor" value="#3498db">

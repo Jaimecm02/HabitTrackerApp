@@ -21,9 +21,9 @@ h1 {
 
 .habit-form input[type="text"] {
     padding: 0.5rem 1rem;
-    background: #363636;
+    background: #1e1e1e;
     color: var(--text-color);
-    border: 1px solid #444;
+    border: 1px solid #2a2a2a;
     font-size: 1rem;
     flex: 1;
     max-width: 200px;
@@ -59,10 +59,10 @@ h1 {
 }
 
 .habit-item {
-    background: #363636;
+    background: #1e1e1e;
     padding: 1.5rem;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     overflow: visible;
     display: flex;
     flex-direction: column;
@@ -124,7 +124,7 @@ h1 {
     width: 12px;
     height: 12px;
     border-radius: 2px;
-    background: #444;
+    background: #2a2a2a;
     cursor: pointer;
     transition: all 0.2s ease;
     position: relative;
@@ -140,7 +140,7 @@ h1 {
 .day-cell[data-date]::after {
     content: attr(data-date);
     position: absolute;
-    background: #363636;
+    background: #1e1e1e;
     padding: 4px 8px;
     border-radius: 4px;
     font-size: 12px;
@@ -151,7 +151,7 @@ h1 {
     transition: opacity 0.2s;
     pointer-events: none;
     z-index: 10;
-    box-shadow: var(--shadow);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
     left: 50%;
     transform: translateX(-50%);
     bottom: calc(100% + 5px);
@@ -171,7 +171,7 @@ h1 {
 .streak-count {
     font-size: 0.9rem;
     color: var(--text-secondary);
-    background: linear-gradient(to bottom, #363636, #2a2a2a);
+    background: linear-gradient(to bottom, #1e1e1e, #151515);
     padding: 6px 12px;
     border-radius: 20px;
     display: inline-flex;
@@ -179,7 +179,7 @@ h1 {
     gap: 6px;
     position: relative;
     overflow: hidden;
-    border: 1px solid #444;
+    border: 1px solid #2a2a2a;
 }
 
 .streak-count::before {
