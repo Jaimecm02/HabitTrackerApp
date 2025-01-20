@@ -7,7 +7,23 @@
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
-    <div id="habitWidget"></div>
+    <div id="sidebar">
+      <ul>
+        <li>
+          <a href="#habitWidget">
+            <svg class="nav-icon"><use href="assets/icons.svg#icon-home"/></svg>
+          </a>
+        </li>
+        <li>
+          <a href="#analytics">
+            <svg class="nav-icon"><use href="assets/icons.svg#icon-analytics"/></svg>
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div id="content">
+      <div id="habitWidget"></div>
+    </div>
     <script src="renderer.js"></script>
   </body>
 </html>

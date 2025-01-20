@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="icon-home" viewBox="0 0 24 24">
+    <path d="M12 2L2 12h3v8h6v-6h2v6h6v-8h3L12 2z" fill="currentColor"/>
+  </symbol>
+  <symbol id="icon-analytics" viewBox="0 0 24 24">
+    <path d="M3 12h6v9H3v-9zm7-4h6v13h-6V8zm7-6h6v19h-6V2z" fill="currentColor"/>
+  </symbol>
+</svg>

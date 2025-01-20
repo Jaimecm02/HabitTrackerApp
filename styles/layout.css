@@ -8,6 +8,7 @@ body {
     padding: 2rem;
     line-height: 1.6;
     text-align: center;
+    display: flex;
 }
 
 .year-grid {
@@ -30,6 +31,63 @@ body {
     overflow: visible;
 }
 
+/* Sidebar styles */
+#sidebar {
+    width: 64px;  /* Fixed width instead of percentage */
+    height: 100%;
+    position: fixed;
+    left: 0;
+    top: 0;
+    background-color: var(--card-bg);
+    padding-top: 20px;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#sidebar ul {
+    list-style-type: none;
+    padding: 0;
+    width: 100%;
+}
+
+#sidebar ul li {
+    padding: 8px;
+    text-align: center;
+}
+
+#sidebar ul li a {
+    text-decoration: none;
+    color: var(--text-color);
+    display: block;
+    font-size: 1.5rem;
+}
+
+#sidebar ul li a:hover {
+    background-color: var(--primary-bg);
+    color: var(--primary-color);
+}
+
+/* Replace .white-icon styles with new SVG icon styles */
+.nav-icon {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+    color: white;
+    transition: color 0.2s ease-in-out;
+}
+
+#sidebar ul li a:hover .nav-icon {
+    color: var(--primary-color);
+}
+
+/* Content styles */
+#content {
+    margin-left: 64px;  /* Adjusted margin to match fixed sidebar width */
+    width: calc(100% - 64px);  /* Adjusted width to be fluid */
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .year-grid {
@@ -38,5 +96,20 @@ body {
         min-width: unset;
         width: 100%;
         overflow-x: scroll;
+    }
+    #sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+    }
+    #sidebar ul li {
+        display: inline;
+    }
+    #sidebar ul li a {
+        display: inline-block;
+    }
+    #content {
+        margin-left: 0;
+        width: 100%;
     }
 }
