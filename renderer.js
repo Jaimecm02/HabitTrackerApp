@@ -6,6 +6,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const habitTracker = new HabitTracker('habitComponent', ipcRenderer);
     const analytics = new Analytics('analyticsComponent', ipcRenderer);
 
+    // Listen for habit changes and update analytics
+    ipcRenderer.on('habits-updated', () => {
+        analytics.refresh();
+    });
+
     // Handle navigation
     document.querySelectorAll('#sidebar a').forEach(link => {
         link.addEventListener('click', (e) => {

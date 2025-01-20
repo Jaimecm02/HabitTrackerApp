@@ -38,6 +38,7 @@ ipcMain.handle('add-habit', async (event, habit) => {
         const habits = loadHabits();
         habits.push(habit);
         saveHabits(habits);
+        event.sender.send('habits-updated');  // Add this line
         return habit;
     } catch (error) {
         console.error('Error in add-habit handler:', error);
@@ -57,6 +58,7 @@ ipcMain.handle('toggle-habit-date', async (event, {habitId, date}) => {
             habit.dates.splice(dateIndex, 1);
         }
         saveHabits(habits);
+        event.sender.send('habits-updated');  // Add this line
         return habit;
     }
     return null;
@@ -68,6 +70,7 @@ ipcMain.handle('delete-habit', async (event, habitId) => {
         const habits = loadHabits();
         const updatedHabits = habits.filter(habit => habit.id !== habitId);
         saveHabits(updatedHabits);
+        event.sender.send('habits-updated');  // Add this line
         return true;
     } catch (error) {
         console.error('Error deleting habit:', error);
