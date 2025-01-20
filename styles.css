@@ -2,3 +2,37 @@
 @import './styles/layout.css';
 @import './styles/components.css';
 @import './styles/utilities.css';
+
+.analytics-container {
+    padding: 20px;
+}
+
+.analytics-container h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.stats-container > div {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stats-container h3 {
+    color: #666;
+    margin-bottom: 10px;
+    font-size: 1rem;
+}
+
+.stats-container p {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #333;
+}
