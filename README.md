@@ -1,17 +1,44 @@
-TODO:
+# Desktop Application
 
-on hover show the day 17-01-2025
+A desktop application built with Electron.
 
+## Installation
 
+1. Clone this repository
+2. Install dependencies:
+```sh
+npm install
+```
 
+## Development
 
-To create a new version for your app, you need to update the version field in your package.json file. Here is an example of how to update it:
+To run the application in development mode:
+```sh
+npm start
+```
 
-  "version": "1.1.0", // Update this version number
+## Building
 
-After updating the version number, you can package and make your app using the following commands:
+To create a new version:
 
+1. Update the version in `package.json`:
+```json
+{
+  "version": "1.1.0"
+}
+```
+
+2. Build the application:
 ```sh
 npm run package
 npm run make
 ```
+
+## Requirements
+
+- Node.js 14.x or higher
+- npm 6.x or higher
+
+## License
+
+MIT License

@@ -10,22 +10,26 @@ class Analytics {
             <div class="analytics-container">
                 <h2>ANALYTICS DASHBOARD</h2>
                 <div class="stats-container">
-                    <div class="stat-card">
+                    <div class="card">
+                        <div class="glow"></div>
                         <div class="stat-icon">📊</div>
                         <h3>Total Habits</h3>
                         <p id="total-habits">0</p>
                     </div>
-                    <div class="stat-card">
+                    <div class="card">
+                        <div class="glow"></div>
                         <div class="stat-icon">✅</div>
                         <h3>This Month</h3>
                         <p id="completion-rate">0</p>
                     </div>
-                    <div class="stat-card">
+                    <div class="card">
+                        <div class="glow"></div>
                         <div class="stat-icon">🔥</div>
                         <h3>Best Streak</h3>
                         <p id="best-streak">0</p>
                     </div>
-                    <div class="stat-card">
+                    <div class="card">
+                        <div class="glow"></div>
                         <div class="stat-icon">📅</div>
                         <h3>Consistency</h3>
                         <p id="consistency">0%</p>
@@ -34,6 +38,16 @@ class Analytics {
                 <div class="chart-container"></div>
             </div>
         `;
+        
+        // Bind the handleMouseMove method to this instance
+        this.handleMouseMove = this.handleMouseMove.bind(this);
+        
+        // Add event listeners for the cards
+        const cards = document.querySelectorAll(".card");
+        cards.forEach(card => {
+            card.addEventListener("mousemove", this.handleMouseMove);
+        });
+        
         await this.updateStats();
         this.renderCharts();
     }
@@ -244,6 +258,14 @@ class Analytics {
     async refresh() {
         await this.updateStats();
         await this.renderCharts();
+    }
+
+    handleMouseMove(e) {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left - rect.width / 2;
+        const mouseY = e.clientY - rect.top - rect.height / 2;
+        const angle = (Math.atan2(mouseY, mouseX) * (180 / Math.PI) + 360) % 360;
+        e.currentTarget.style.setProperty("--start", angle + 60);
     }
 }
 
