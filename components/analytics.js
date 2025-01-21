@@ -2,6 +2,10 @@ class Analytics {
     constructor(containerId, ipcRenderer) {
         this.container = document.getElementById(containerId);
         this.ipcRenderer = ipcRenderer;
+        this.charts = {
+            weeklyTrend: null,
+            habitComparison: null
+        };
         this.init();
     }
 
@@ -19,7 +23,7 @@ class Analytics {
                     <div class="card">
                         <div class="glow"></div>
                         <div class="stat-icon">✅</div>
-                        <h3>This Month</h3>
+                        <h3>${this.getCurrentMonthName()}</h3>
                         <p id="completion-rate">0</p>
                     </div>
                     <div class="card">
@@ -50,6 +54,13 @@ class Analytics {
         
         await this.updateStats();
         this.renderCharts();
+
+        // Add window resize listener
+        window.addEventListener('resize', this.handleResize.bind(this));
+    }
+
+    getCurrentMonthName() {
+        return new Date().toLocaleString('en-US', { month: 'long' });
     }
 
     async updateStats() {
@@ -146,7 +157,7 @@ class Analytics {
         const ctx = document.getElementById('weeklyTrendChart').getContext('2d');
         const weeklyData = this.getWeeklyCompletionData(habits);
 
-        new Chart(ctx, {
+        this.charts.weeklyTrend = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: weeklyData.labels,
@@ -160,6 +171,7 @@ class Analytics {
                 }]
             },
             options: {
+                maintainAspectRatio: false,
                 responsive: true,
                 plugins: {
                     title: {
@@ -193,7 +205,7 @@ class Analytics {
             count: habit.dates.length
         })).sort((a, b) => b.count - a.count);
 
-        new Chart(ctx, {
+        this.charts.habitComparison = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: habitStats.map(h => h.name),
@@ -205,6 +217,7 @@ class Analytics {
                 }]
             },
             options: {
+                maintainAspectRatio: false,
                 responsive: true,
                 plugins: {
                     title: {
@@ -256,6 +269,13 @@ class Analytics {
     }
 
     async refresh() {
+        // Destroy existing charts before recreating them
+        if (this.charts.weeklyTrend) {
+            this.charts.weeklyTrend.destroy();
+        }
+        if (this.charts.habitComparison) {
+            this.charts.habitComparison.destroy();
+        }
         await this.updateStats();
         await this.renderCharts();
     }
@@ -266,6 +286,15 @@ class Analytics {
         const mouseY = e.clientY - rect.top - rect.height / 2;
         const angle = (Math.atan2(mouseY, mouseX) * (180 / Math.PI) + 360) % 360;
         e.currentTarget.style.setProperty("--start", angle + 60);
+    }
+
+    handleResize() {
+        if (this.charts.weeklyTrend) {
+            this.charts.weeklyTrend.resize();
+        }
+        if (this.charts.habitComparison) {
+            this.charts.habitComparison.resize();
+        }
     }
 }
 

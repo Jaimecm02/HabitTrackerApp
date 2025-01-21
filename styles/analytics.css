@@ -1,0 +1,197 @@
+@import './variables.css';
+
+/* Analytics Styles */
+.analytics-container {
+    padding: 2rem;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+.analytics-container h2 {
+    color: var(--text-color);
+    margin-bottom: 2rem;
+    text-align: center;
+    font-size: 2rem;
+}
+
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.card {
+    --start: 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 80%;
+    height: 200px;
+    padding: 20px;
+    background-color: var(--card-dark-bg);
+    border-radius: 14px;
+    transition: border-color 0.3s ease-in-out;
+}
+
+.card::before {
+    position: absolute;
+    content: "";
+    width: 100%;
+    height: 100%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 14px;
+    border: 2px solid transparent;
+    background: linear-gradient(45deg, #12c2e9, #c471ed, #f64f59);
+    background-size: 200% 200%;
+    animation: gradientMove 8s ease infinite;
+    background-attachment: fixed;
+    mask: linear-gradient(#0000, #0000), conic-gradient(from calc((var(--start) - (20 * 1.1)) * 1deg), #ffffff1f 0deg, white, #ffffff00 100deg);
+    mask-composite: intersect;
+    mask-clip: padding-box, border-box;
+    opacity: 0;
+    transition: 0.5s ease;
+}
+
+.glow {
+    pointer-events: none;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    filter: blur(20px);
+    transition: all 0.4s ease;
+}
+
+.glow::before {
+    position: absolute;
+    content: "";
+    width: 98%;
+    height: 98%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 14px;
+    border: 18px solid transparent;
+    background: linear-gradient(45deg, #12c2e9, #c471ed, #f64f59);
+    background-size: 200% 200%;
+    animation: gradientMove 8s ease infinite;
+    mask: linear-gradient(#0000, #0000), conic-gradient(from calc((var(--start) - (20 * 1.1)) * 1deg), #000 0deg, #ffffff, rgba(0, 0, 0, 0) 100deg);
+    mask-composite: intersect;
+    mask-clip: padding-box, border-box;
+    opacity: 0;
+    transition: all 0.6s ease;
+}
+
+.card:hover > .glow::before {
+    opacity: 0.8;
+    filter: blur(25px);
+    transform: translate(-50%, -50%) scale(1.05);
+}
+
+.card:hover::before {
+    opacity: 0.8;
+    background-size: 150% 150%;
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    z-index: 1;
+}
+
+.card h3 {
+    color: var(--text-color);
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    z-index: 1;
+}
+
+.card p {
+    color: var(--text-color);
+    font-size: 2.2rem;
+    font-weight: bold;
+    margin: 0;
+    z-index: 1;
+}
+
+.chart-container {
+    margin-top: 2rem;
+    width: 100%;
+}
+
+.chart-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    width: 100%;
+}
+
+.weekly-trend-container,
+.habit-comparison-container {
+    width: 95%;
+    min-height: 300px;
+    position: relative;
+    background: var(--card-dark-bg);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.chart {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.analytics-container {
+    padding: 20px;
+}
+
+.analytics-container h2 {
+    margin-bottom: 20px;
+    color: var(--text-color);
+}
+
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.stats-container > div {
+    background: var(--card-dark-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stats-container h3 {
+    color: var(--text-color);
+    margin-bottom: 10px;
+    font-size: 1rem;
+}
+
+.stats-container p {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+@keyframes gradientMove {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
