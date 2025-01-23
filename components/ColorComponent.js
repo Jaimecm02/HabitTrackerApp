@@ -12,25 +12,32 @@ class ColorComponent {
         if (storedData && storedData.date === today) {
             return {
                 color: storedData.color,
-                holographic: storedData.holographic
+                secondColor: storedData.secondColor,
+                holographic: storedData.holographic,
+                gradient: storedData.gradient
             };
         }
 
         const letters = '0123456789ABCDEF';
         let color = '#';
+        let secondColor = '#';
         for (let i = 0; i < 6; i++) {
             color += letters[Math.floor(Math.random() * 16)];
+            secondColor += letters[Math.floor(Math.random() * 16)];
         }
 
-        const holographic = Math.random() < 0.01;
+        const holographic = Math.random() < 0.035; // 3.5% chance of holographic color (one every 30 days)
+        const gradient = Math.random() < 0.065; // 6.5% chance of gradient color (two every 30 days)
 
         localStorage.setItem('dailyColor', JSON.stringify({
             date: today,
             color: color,
-            holographic: holographic
+            secondColor: secondColor,
+            holographic: holographic,
+            gradient: gradient
         }));
 
-        return { color, holographic };
+        return { color, secondColor, holographic, gradient };
     }
 
     hexToRgb(hex) {
@@ -46,13 +53,22 @@ class ColorComponent {
         return brightness > 128 ? '#000000' : '#FFFFFF';
     }
 
-    saveColorToHistory(color, date, holographic) {
+    saveColorToHistory(color, date, holographic, gradient, secondColor) {
         const history = localStorage.getItem('colorHistory') || '[]';
         const historyArray = JSON.parse(history);
         
         if (!historyArray.some(item => item.date === date)) {
             const rgb = this.hexToRgb(color);
-            historyArray.push({ date, color, rgb, holographic });
+            const rgb2 = gradient ? this.hexToRgb(secondColor) : null;
+            historyArray.push({ 
+                date, 
+                color, 
+                secondColor,
+                rgb, 
+                rgb2,
+                holographic, 
+                gradient 
+            });
             localStorage.setItem('colorHistory', JSON.stringify(historyArray));
         }
     }
@@ -64,13 +80,13 @@ class ColorComponent {
 
     setupComponent() {
         this.container.innerHTML = '';
-        const { color, holographic } = this.generateDailyColor();
+        const { color, secondColor, holographic, gradient } = this.generateDailyColor();
         const rgbColor = this.hexToRgb(color);
         const textColor = this.calculateContrastColor(color);
         const today = new Date().toDateString();
 
         // Save today's color to history with holographic property
-        this.saveColorToHistory(color, today, holographic);
+        this.saveColorToHistory(color, today, holographic, gradient, secondColor);
 
         // Get updated color history
         const colorHistory = this.getColorHistory();
@@ -79,7 +95,11 @@ class ColorComponent {
         // Create main color card
         const card = document.createElement('div');
         card.className = `color-card${holographic ? ' holographic' : ''}`;
-        card.style.backgroundColor = color;
+        if (gradient) {
+            card.style.background = `linear-gradient(45deg, ${color}, ${secondColor})`;
+        } else {
+            card.style.backgroundColor = color;
+        }
 
         const colorInfo = document.createElement('div');
         colorInfo.className = 'color-info';
@@ -88,12 +108,16 @@ class ColorComponent {
         const hexCode = document.createElement('div');
         hexCode.className = 'color-code';
         hexCode.style.fontWeight = 'bold';
-        hexCode.textContent = `HEX: ${color.toUpperCase()}`;
+        hexCode.textContent = gradient ? 
+            `HEX: ${color.toUpperCase()} → ${secondColor.toUpperCase()}` :
+            `${color.toUpperCase()}`;
 
         const rgbCode = document.createElement('div');
         rgbCode.className = 'color-code';
         rgbCode.style.fontWeight = 'bold';
-        rgbCode.textContent = `RGB(${rgbColor})`;
+        rgbCode.innerHTML = gradient ?
+            `RGB_1(${rgbColor})<br>RGB_2(${this.hexToRgb(secondColor)})<br>` :
+            `RGB(${rgbColor})`;
 
         const cardNumber = document.createElement('div');
         cardNumber.className = 'card-number';
@@ -128,13 +152,19 @@ class ColorComponent {
         colorHistory.reverse().forEach((item, index) => {
             const historyCard = document.createElement('div');
             historyCard.className = `history-card${item.holographic ? ' holographic' : ''}`;
-            historyCard.style.backgroundColor = item.color;
+            if (item.gradient) {
+                historyCard.style.background = `linear-gradient(45deg, ${item.color}, ${item.secondColor})`;
+            } else {
+                historyCard.style.backgroundColor = item.color;
+            }
             
             const historyInfo = document.createElement('div');
             historyInfo.className = 'history-info';
             historyInfo.style.color = this.calculateContrastColor(item.color);
             historyInfo.style.fontWeight = 'bold';
-            historyInfo.innerHTML = `${item.date}<br>${item.color}<br>RGB(${item.rgb})`;
+            historyInfo.innerHTML = item.gradient ? 
+                `${item.date}<br>HEX: ${item.color} → ${item.secondColor}<br>RGB_1(${item.rgb})<br>RGB_2(${item.rgb2})` :
+                `${item.date}<br>HEX: ${item.color} <br>RGB(${item.rgb})`;
 
             const historyCardNumber = document.createElement('div');
             historyCardNumber.className = 'card-number';

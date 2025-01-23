@@ -21,14 +21,18 @@
     padding: 0;
     background-color: white;
     border-radius: 14px;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-    transition: transform 0.1s ease, box-shadow 0.3s ease;
+    transition: transform 0.1s ease, box-shadow 0.3s ease, background-position 0.3s ease;
     overflow: hidden;
     margin: auto;
     margin-bottom: 2rem;
     position: relative;
     transform-style: preserve-3d;
     transform: perspective(1000px);
+    background-size: 200% 200%;
+}
+
+.color-card:hover {
+    background-position: 100% 100%;
 }
 
 .color-card::before {
@@ -53,10 +57,6 @@
     background-size: 400% 400%;
     pointer-events: none;
     border-radius: 14px;
-}
-
-.color-card:hover {
-    box-shadow: 0 12px 24px rgba(0,0,0,0.2);
 }
 
 .color-info {
@@ -126,15 +126,19 @@
     width: 280px;
     height: 428px;
     border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
     overflow: hidden;
-    transition: transform 0.1s ease, box-shadow 0.3s ease;
+    transition: transform 0.1s ease, box-shadow 0.3s ease, background-position 0.3s ease;
     transform-style: preserve-3d;
     transform: perspective(1000px);
+    background-size: 200% 200%;
+}
+
+.history-card:hover {
+    background-position: 100% 100%;
 }
 
 .history-card::before {
@@ -235,4 +239,8 @@
 
 .holographic:hover::before {
     animation-duration: 3s;
+}
+
+[class*="-card"][style*="linear-gradient"]:hover {
+    background-position: right bottom;
 }
