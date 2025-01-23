@@ -10,7 +10,10 @@ class ColorComponent {
         const storedData = stored ? JSON.parse(stored) : null;
 
         if (storedData && storedData.date === today) {
-            return storedData.color;
+            return {
+                color: storedData.color,
+                holographic: storedData.holographic
+            };
         }
 
         const letters = '0123456789ABCDEF';
@@ -19,17 +22,20 @@ class ColorComponent {
             color += letters[Math.floor(Math.random() * 16)];
         }
 
+        const holographic = Math.random() < 0.01;
+
         localStorage.setItem('dailyColor', JSON.stringify({
             date: today,
-            color: color
+            color: color,
+            holographic: holographic
         }));
 
-        return color;
+        return { color, holographic };
     }
 
     hexToRgb(hex) {
         const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        return result ? `RGB(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)})` : null;
+        return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : null;
     }
 
     calculateContrastColor(hexcolor) {
@@ -40,13 +46,13 @@ class ColorComponent {
         return brightness > 128 ? '#000000' : '#FFFFFF';
     }
 
-    saveColorToHistory(color, date) {
+    saveColorToHistory(color, date, holographic) {
         const history = localStorage.getItem('colorHistory') || '[]';
         const historyArray = JSON.parse(history);
         
-        // Check if we already have this date in history
         if (!historyArray.some(item => item.date === date)) {
-            historyArray.push({ date, color });
+            const rgb = this.hexToRgb(color);
+            historyArray.push({ date, color, rgb, holographic });
             localStorage.setItem('colorHistory', JSON.stringify(historyArray));
         }
     }
@@ -58,17 +64,17 @@ class ColorComponent {
 
     setupComponent() {
         this.container.innerHTML = '';
-        const color = this.generateDailyColor();
+        const { color, holographic } = this.generateDailyColor();
         const rgbColor = this.hexToRgb(color);
         const textColor = this.calculateContrastColor(color);
         const today = new Date().toDateString();
 
-        // Save today's color to history
-        this.saveColorToHistory(color, today);
+        // Save today's color to history with holographic property
+        this.saveColorToHistory(color, today, holographic);
 
         // Get updated color history
         const colorHistory = this.getColorHistory();
-        const cardIndex = colorHistory.length; // Get the index for the main card
+        const cardIndex = colorHistory.length;
 
         // Create main color card
         const card = document.createElement('div');
@@ -81,18 +87,18 @@ class ColorComponent {
         
         const hexCode = document.createElement('div');
         hexCode.className = 'color-code';
-        hexCode.style.fontWeight = 'bold'; // Make hex code bold
+        hexCode.style.fontWeight = 'bold';
         hexCode.textContent = `HEX: ${color.toUpperCase()}`;
 
         const rgbCode = document.createElement('div');
         rgbCode.className = 'color-code';
-        rgbCode.style.fontWeight = 'bold'; // Make RGB code bold
-        rgbCode.textContent = rgbColor;
+        rgbCode.style.fontWeight = 'bold';
+        rgbCode.textContent = `RGB(${rgbColor})`;
 
         const cardNumber = document.createElement('div');
         cardNumber.className = 'card-number';
-        cardNumber.style.fontWeight = 'bold'; // Make card number bold
-        cardNumber.textContent = cardIndex; // Use card index
+        cardNumber.style.fontWeight = 'bold'; 
+        cardNumber.textContent = cardIndex;
         cardNumber.style.position = 'absolute';
         cardNumber.style.top = '10px';
         cardNumber.style.right = '10px';
@@ -103,6 +109,10 @@ class ColorComponent {
         card.appendChild(colorInfo);
         card.appendChild(cardNumber);
         this.container.appendChild(card);
+
+        // Add mouse move handlers to main card
+        card.addEventListener('mousemove', (e) => this.handleMouseMove(e, card));
+        card.addEventListener('mouseleave', (e) => this.handleMouseLeave(e, card));
 
         // Add history section
         const historySection = document.createElement('div');
@@ -124,7 +134,7 @@ class ColorComponent {
             historyInfo.className = 'history-info';
             historyInfo.style.color = this.calculateContrastColor(item.color);
             historyInfo.style.fontWeight = 'bold';
-            historyInfo.textContent = `${item.date}: ${item.color}`;
+            historyInfo.innerHTML = `${item.date}<br>${item.color}<br>RGB(${item.rgb})`;
 
             const historyCardNumber = document.createElement('div');
             historyCardNumber.className = 'card-number';
@@ -138,11 +148,33 @@ class ColorComponent {
             historyCard.appendChild(historyInfo);
             historyCard.appendChild(historyCardNumber);
             historyContainer.appendChild(historyCard);
+
+            // Add mouse move handlers to history cards
+            historyCard.addEventListener('mousemove', (e) => this.handleMouseMove(e, historyCard));
+            historyCard.addEventListener('mouseleave', (e) => this.handleMouseLeave(e, historyCard));
         });
 
         historySection.appendChild(historyTitle);
         historySection.appendChild(historyContainer);
         this.container.appendChild(historySection);
+    }
+
+    handleMouseMove(e, card) {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        // Calculate rotation
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const rotateX = ((y - centerY) / centerY) * -5;
+        const rotateY = ((x - centerX) / centerX) * 5;
+
+        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    }
+
+    handleMouseLeave(e, card) {
+        card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
     }
 }
 
