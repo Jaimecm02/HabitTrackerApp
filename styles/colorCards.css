@@ -1,14 +1,13 @@
 @import "variables.css";
 
 #colorComponent {
-    padding: 2rem;
-    max-width: 100%;
+    padding: 2rem 0;
+    max-width: 95%;
     margin: 0 auto;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: auto;
-    width: calc(100%-5%);
     margin-left: auto;
     flex-direction: column;
 }
@@ -99,9 +98,9 @@
 
 .history-section {
     width: 100%;
-    max-width: 1200px;
-    margin: 2rem auto;
-    padding: 0 1rem;
+    max-width: 100%;
+    margin: 2rem 0;  
+    padding: 0;  
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -117,9 +116,10 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 280px));
     gap: 1.5rem;
-    padding: 1rem;
+    padding: 0;
     width: 100%;
     justify-content: center;
+    max-width: 100%;
 }
 
 .history-card {
@@ -144,26 +144,9 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: 
-        linear-gradient(
-            125deg,
-            transparent 0%,
-            rgba(255, 255, 255, 0.05) 25%,
-            rgba(255, 255, 255, 0.2) 45%,
-            rgba(255, 255, 255, 0.1) 65%,
-            transparent 100%
-        ),
-        linear-gradient(
-            45deg,
-            rgba(255,0,0,0.02) 0%,
-            rgba(0,255,0,0.02) 50%,
-            rgba(0,0,255,0.02) 100%
-        );
-    background-size: 400% 400%, 100% 100%;
     pointer-events: none;
     border-radius: 8px;
     opacity: 0.6;
-    mix-blend-mode: soft-light;
 }
 
 .history-card::after {
@@ -173,21 +156,8 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(
-        45deg,
-        transparent 30%,
-        rgba(255, 255, 255, 0.05) 45%,
-        rgba(255, 255, 255, 0.1) 50%,
-        rgba(255, 255, 255, 0.05) 55%,
-        transparent 70%
-    );
-    background-size: 300% 300%;
     pointer-events: none;
     border-radius: 8px;
-}
-
-.history-card:hover {
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
 }
 
 .history-info {
@@ -208,4 +178,61 @@
     padding: 16px;
     text-align: right;
     transform: translateZ(20px);
+}
+
+.holographic {
+    position: relative;
+    overflow: hidden;
+}
+
+.holographic::before,
+.holographic::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    border-radius: inherit;
+}
+
+.holographic::before {
+    background: linear-gradient(
+        125deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.1) 20%,
+        rgba(255, 255, 255, 0.3) 40%,
+        rgba(255, 255, 255, 0.5) 50%,
+        rgba(255, 255, 255, 0.3) 60%,
+        rgba(255, 255, 255, 0.1) 80%,
+        transparent 100%
+    );
+    background-size: 400% 400%;
+    animation: holographicShine 5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    mix-blend-mode: overlay;
+    opacity: 0.8;
+}
+
+.holographic::after {
+    background: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.05) 0%,
+        rgba(255, 255, 255, 0.15) 100%
+    );
+    mix-blend-mode: color-dodge;
+    opacity: 0.6;
+}
+
+@keyframes holographicShine {
+    0%, 100% {
+        background-position: 100% 100%;
+    }
+    50% {
+        background-position: 0% 0%;
+    }
+}
+
+.holographic:hover::before {
+    animation-duration: 3s;
 }

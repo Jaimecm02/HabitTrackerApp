@@ -78,7 +78,7 @@ class ColorComponent {
 
         // Create main color card
         const card = document.createElement('div');
-        card.className = 'color-card';
+        card.className = `color-card${holographic ? ' holographic' : ''}`;
         card.style.backgroundColor = color;
 
         const colorInfo = document.createElement('div');
@@ -127,7 +127,7 @@ class ColorComponent {
         
         colorHistory.reverse().forEach((item, index) => {
             const historyCard = document.createElement('div');
-            historyCard.className = 'history-card';
+            historyCard.className = `history-card${item.holographic ? ' holographic' : ''}`;
             historyCard.style.backgroundColor = item.color;
             
             const historyInfo = document.createElement('div');
