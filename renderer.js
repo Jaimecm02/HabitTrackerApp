@@ -1,10 +1,12 @@
 const { ipcRenderer } = require('electron');
 const HabitTracker = require('./components/habitTracker');
 const Analytics = require('./components/analytics');
+const ColorComponent = require('./components/ColorComponent');
 
 document.addEventListener('DOMContentLoaded', () => {
     const habitTracker = new HabitTracker('habitComponent', ipcRenderer);
     const analytics = new Analytics('analyticsComponent', ipcRenderer);
+    new ColorComponent();
 
     // Listen for habit changes and update analytics
     ipcRenderer.on('habits-updated', () => {
@@ -25,5 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Show default view // Changed to show habitComponent
     document.getElementById('habitComponent').style.display = 'none';
-    document.getElementById('analyticsComponent').style.display = 'block';
+    document.getElementById('analyticsComponent').style.display = 'none';
+    document.getElementById('colorComponent').style.display = 'block';
 });

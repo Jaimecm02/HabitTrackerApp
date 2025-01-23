@@ -1,0 +1,34 @@
+#colorComponent {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+.color-card {
+    aspect-ratio: 15.5 / 3.5;
+    width: 250px;
+    max-width: 100%;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin: 1rem;
+    background: var(--card-bg);
+}
+
+.color-code {
+    font-family: monospace;
+    font-size: 16px;
+    padding: 1rem;
+    text-align: center;
+    background: var(--card-dark-bg);
+}
+
+.color-display {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
