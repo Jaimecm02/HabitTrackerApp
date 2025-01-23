@@ -1,34 +1,132 @@
+@import "variables.css";
+
 #colorComponent {
+    padding: 2rem;
+    max-width: 100%;
+    margin: 0 auto;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    padding: 2rem;
+    min-height: auto;
+    width: calc(100%-5%);
+    margin-left: auto;
+    flex-direction: column;
 }
 
 .color-card {
-    aspect-ratio: 15.5 / 3.5;
-    width: 250px;
-    max-width: 100%;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
-    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 400px;
+    aspect-ratio: 20 / 30.5;
+    padding: 0;
+    background-color: white;
+    border-radius: 14px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    margin: 1rem;
-    background: var(--card-bg);
+    overflow: hidden;
+    margin: auto;
+    margin-bottom: 2rem;
+}
+
+.color-card::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    pointer-events: none;
+}
+
+.color-info {
+    position: absolute;
+    bottom: 24px;
+    left: 24px;
+    background-color: transparent;
+    padding: 8px;
+    text-shadow: 0px 1px 2px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .color-code {
-    font-family: monospace;
-    font-size: 16px;
-    padding: 1rem;
-    text-align: center;
-    background: var(--card-dark-bg);
+    font-family: 'Courier New', monospace;
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin: 0;
+    background: transparent;
+    padding: 0;
+    text-align: left;
+    letter-spacing: 0.5px;
 }
 
 .color-display {
+    height: 250px;
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: opacity 0.3s ease;
+}
+
+.color-display:hover {
+    opacity: 0.9;
+}
+
+.history-section {
+    width: 100%;
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.history-title {
+    color: var(--text-color);
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.history-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+    width: 100%;
+    justify-content: center;
+}
+
+.history-card {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.history-info {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    padding: 12px;
+    text-align: center;
+    text-shadow: 0px 1px 2px rgba(0,0,0,0.3);
+    line-height: 1.4;
+}
+
+.card-number {
+    font-family: 'Courier New', monospace;
+    font-size: 1.2rem;
+    font-weight: bold;
+    background: transparent;
+    padding: 16px;
+    text-align: right;
 }
