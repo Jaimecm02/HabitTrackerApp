@@ -110,7 +110,7 @@ class ColorComponent {
         hexCode.style.fontWeight = 'bold';
         hexCode.textContent = gradient ? 
             `HEX: ${color.toUpperCase()} → ${secondColor.toUpperCase()}` :
-            `${color.toUpperCase()}`;
+            `HEX: ${color.toUpperCase()}`;
 
         const rgbCode = document.createElement('div');
         rgbCode.className = 'color-code';

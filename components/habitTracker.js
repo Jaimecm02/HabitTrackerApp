@@ -226,19 +226,41 @@ class HabitTracker {
         grid.className = 'year-grid';
         
         const today = new Date().toISOString().split('T')[0];
-        const year = 2025;
+        const year = new Date().getFullYear();
         const startDate = new Date(year, 0, 1);
         
-        for (let i = 0; i < 365; i++) {
+        // Calculate leap year
+        const isLeapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+        const totalDays = isLeapYear ? 366 : 365;
+        
+        // Get the number of empty cells for the start of the grid
+        const weekStart = 1; // Monday
+        const firstDayOfWeek = (startDate.getDay() + 6) % 7; // Adjust to start from Monday
+        const emptyCells = (7 + firstDayOfWeek - weekStart) % 7;
+        
+        // Calculate the number of columns (weeks)
+        const totalCells = totalDays + emptyCells;
+        const columns = Math.ceil(totalCells / 7);
+        grid.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+        
+        // Create empty cells
+        for (let i = 0; i < emptyCells; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'day-cell empty-cell';
+            grid.appendChild(cell);
+        }
+        
+        // Create day cells
+        for (let i = 0; i < totalDays; i++) {
             const cell = document.createElement('div');
             cell.className = 'day-cell';
+
             const currentDate = new Date(startDate);
             currentDate.setDate(startDate.getDate() + i);
             
             const dateStr = currentDate.toISOString().split('T')[0];
             const [yyyy, mm, dd] = dateStr.split('-');
             const formattedDate = `${dd}-${mm}-${yyyy}`;
-            
             cell.setAttribute('data-date', formattedDate);
             
             if (habit.dates.includes(dateStr)) {
@@ -266,11 +288,6 @@ class HabitTracker {
             
             grid.appendChild(cell);
         }
-        
-        const firstDay2025 = document.createElement('div');
-        firstDay2025.className = 'day-cell first-day-2025';
-        firstDay2025.setAttribute('data-date', '01-01-2025');
-        grid.appendChild(firstDay2025);
         
         return grid;
     }

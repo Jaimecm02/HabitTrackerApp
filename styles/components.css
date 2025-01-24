@@ -1,8 +1,8 @@
 @import './variables.css';
 
-h1 {
+h1, h2 {
     color: var(--text-color);
-    font-size: 2.5rem;
+    font-size: 2rem;
     margin-bottom: 2rem;
     text-align: center;
 }
@@ -120,6 +120,26 @@ h1 {
     transform: translateY(-1px);
 }
 
+.year-grid {
+    display: grid;
+    grid-template-columns: repeat(53, 1fr);
+    grid-template-rows: repeat(7, 1fr);
+    gap: 3px;
+    padding: 1rem;
+    max-width: 100%;
+    overflow-x: auto;
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    min-height: 150px;
+    min-width: 800px;
+    margin: 0 auto;
+    grid-auto-flow: column;
+    grid-template-rows: repeat(7, 1fr);
+    padding: 1.5rem;
+    position: relative;
+    overflow: visible;
+}
+
 .day-cell {
     width: 12px;
     height: 12px;
@@ -129,6 +149,12 @@ h1 {
     transition: all 0.2s ease;
     position: relative;
     opacity: 0.5;
+    pointer-events: none;
+}
+
+.day-cell.empty-cell {
+    background: transparent;
+    cursor: default;
     pointer-events: none;
 }
 
@@ -167,6 +193,7 @@ h1 {
 .day-cell.today:hover {
     transform: scale(1.2);
 }
+
 
 .streak-count {
     font-size: 0.9rem;

@@ -25,8 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Show default view // Changed to show habitComponent
-    document.getElementById('habitComponent').style.display = 'none';
+    // Show default view
+    document.getElementById('habitComponent').style.display = 'block';
     document.getElementById('analyticsComponent').style.display = 'none';
-    document.getElementById('colorComponent').style.display = 'block';
+    document.getElementById('colorComponent').style.display = 'none';
 });
