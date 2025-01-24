@@ -1,4 +1,4 @@
-# Desktop Application
+# Habit Tracker Desktop Application
 
 A desktop application built with Electron.
 
