@@ -108,7 +108,7 @@ class ColorComponent {
         return brightness > 128 ? '#000000' : '#FFFFFF';
     }
 
-    saveColorToHistory(color, date, holographic, gradient, secondColor, gem) {  // Added gem parameter
+    saveColorToHistory(color, date, holographic, gradient, secondColor, gem) {
         const history = localStorage.getItem('colorHistory') || '[]';
         const historyArray = JSON.parse(history);
         
@@ -123,7 +123,7 @@ class ColorComponent {
                 rgb2,
                 holographic, 
                 gradient,
-                gem  // Added gem property
+                gem
             });
             localStorage.setItem('colorHistory', JSON.stringify(historyArray));
         }
@@ -200,6 +200,9 @@ class ColorComponent {
 
         // Add history section
         this.addHistorySection(colorHistory);
+
+        // Add preview section after history section
+        this.addPreviewSection();
 
         // Add test section
         // this.addTestSection();
@@ -283,35 +286,39 @@ class ColorComponent {
             const distanceFromCenter = Math.hypot(
                 centerX - width / 2,
                 centerY - height / 2
-            );
+            ) || 0; // Ensure we have a number, not NaN
             
-            const maxDistance = Math.hypot(width / 2, height / 2);
-            const proximity = Math.max(0, Math.min(1, 1 - (distanceFromCenter / maxDistance)));
+            const maxDistance = Math.hypot(width / 2, height / 2) || 1; // Prevent division by zero
+            const proximity = Math.max(0, Math.min(1, 1 - (distanceFromCenter / maxDistance))) || 0;
             
             // Create more gem-like gradients with safe opacity values
             const gradient = ctx.createLinearGradient(
-                triangle[0][0], triangle[0][1],
-                triangle[2][0], triangle[2][1]
+                triangle[0][0] || 0, 
+                triangle[0][1] || 0,
+                triangle[2][0] || 0, 
+                triangle[2][1] || 0
             );
             
-            const baseOpacity1 = Math.max(0, Math.min(1, 0.1 + proximity * 0.3));
-            const baseOpacity2 = Math.max(0, Math.min(1, 0.05 + proximity * 0.15));
+            // Ensure opacity values are valid numbers between 0 and 1
+            const baseOpacity1 = Math.max(0.1, Math.min(0.4, 0.1 + proximity * 0.3)) || 0.1;
+            const baseOpacity2 = Math.max(0.05, Math.min(0.2, 0.05 + proximity * 0.15)) || 0.05;
             
             gradient.addColorStop(0, `rgba(255, 255, 255, ${baseOpacity1})`);
             gradient.addColorStop(0.5, `rgba(255, 255, 255, ${baseOpacity2})`);
             gradient.addColorStop(1, `rgba(255, 255, 255, ${baseOpacity1})`);
             
             ctx.beginPath();
-            ctx.moveTo(triangle[0][0], triangle[0][1]);
-            ctx.lineTo(triangle[1][0], triangle[1][1]);
-            ctx.lineTo(triangle[2][0], triangle[2][1]);
+            ctx.moveTo(triangle[0][0] || 0, triangle[0][1] || 0);
+            ctx.lineTo(triangle[1][0] || 0, triangle[1][1] || 0);
+            ctx.lineTo(triangle[2][0] || 0, triangle[2][1] || 0);
             ctx.closePath();
             
             ctx.fillStyle = gradient;
             ctx.fill();
             
             // Add subtle edges with safe opacity value
-            ctx.strokeStyle = `rgba(255, 255, 255, ${Math.max(0, Math.min(1, 0.1 + proximity * 0.2))})`;
+            const edgeOpacity = Math.max(0.1, Math.min(0.3, 0.1 + proximity * 0.2)) || 0.1;
+            ctx.strokeStyle = `rgba(255, 255, 255, ${edgeOpacity})`;
             ctx.lineWidth = 0.5;
             ctx.stroke();
         });
@@ -370,6 +377,61 @@ class ColorComponent {
         historySection.appendChild(historyTitle);
         historySection.appendChild(historyContainer);
         this.container.appendChild(historySection);
+    }
+
+    addPreviewSection() {
+        const previewSection = document.createElement('div');
+        previewSection.className = 'preview-section';
+        
+        const previewTitle = document.createElement('h2');
+        previewTitle.textContent = 'CARD TYPES';
+        previewTitle.className = 'preview-title';
+        
+        const previewContainer = document.createElement('div');
+        previewContainer.className = 'preview-container';
+
+        // Create example cards
+        const normalCard = this.createPreviewCard('#FF5733', false, false, false, 'Normal Card');
+        const holoCard = this.createPreviewCard('#4287f5', true, false, false, 'Holographic Card');
+        const gradientCard = this.createPreviewCard('#33ff57', false, true, false, 'Gradient Card', '#5733ff');
+        const gemCard = this.createPreviewCard('#f54287', false, false, true, 'Gem Card');
+        const gradientGemCard = this.createPreviewCard('#ff9933', false, true, true, 'Gradient Gem Card', '#9933ff');
+        const holoGemCard = this.createPreviewCard('#87f542', true, false, true, 'Holographic Gem Card');
+        const holoGradientCard = this.createPreviewCard('#42f587', true, true, false, 'Holographic Gradient Card', '#f58742');
+        const holoGradientGemCard = this.createPreviewCard('#8742f5', true, true, true, 'Holographic Gradient Gem Card', '#f54287');
+
+        [normalCard, holoCard, gradientCard, gemCard, gradientGemCard, holoGemCard, holoGradientCard, holoGradientGemCard].forEach(card => {
+            previewContainer.appendChild(card);
+            card.addEventListener('mousemove', (e) => this.handleMouseMove(e, card));
+            card.addEventListener('mouseleave', (e) => this.handleMouseLeave(e, card));
+        });
+
+        previewSection.appendChild(previewTitle);
+        previewSection.appendChild(previewContainer);
+        this.container.appendChild(previewSection);
+    }
+
+    createPreviewCard(color, holographic, gradient, gem, label, secondColor = '#ffffff') {
+        const card = document.createElement('div');
+        card.className = `preview-card${holographic ? ' holographic' : ''}${gem ? ' gem' : ''}`;
+        
+        if (gradient) {
+            card.style.background = `linear-gradient(45deg, ${color}, ${secondColor})`;
+        } else {
+            card.style.backgroundColor = color;
+        }
+
+        if (gem) {
+            this.addDelaunayPattern(card);
+        }
+
+        const cardLabel = document.createElement('div');
+        cardLabel.className = 'preview-label';
+        cardLabel.style.color = this.calculateContrastColor(color);
+        cardLabel.textContent = label;
+        
+        card.appendChild(cardLabel);
+        return card;
     }
 
     addTestSection() {
