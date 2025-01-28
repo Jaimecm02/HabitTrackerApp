@@ -5,50 +5,100 @@ class ColorComponent {
     }
 
     delaunayTriangulation(points) {
-        function circumcenter(a, b, c) {
-          const ax = a[0], ay = a[1];
-          const bx = b[0], by = b[1];
-          const cx = c[0], cy = c[1];
-          
-          const d = 2 * (ax * (by - cy) + bx * (cy - ay) + cx * (ay - by));
-          const ux = ((ax * ax + ay * ay) * (by - cy) + (bx * bx + by * by) * (cy - ay) + (cx * cx + cy * cy) * (ay - by)) / d;
-          const uy = ((ax * ax + ay * ay) * (cx - bx) + (bx * bx + by * by) * (ax - cx) + (cx * cx + cy * cy) * (bx - ax)) / d;
-          
-          return [ux, uy];
+        // Helper functions
+        const EPSILON = 1e-8;
+        
+        function Triangle(a, b, c) {
+            this.a = a;
+            this.b = b;
+            this.c = c;
+            this.edges = [[a, b], [b, c], [c, a]];
+            this.circumcircle = this.calculateCircumcircle();
         }
-      
-        function inCircumcircle(a, b, c, p) {
-          const center = circumcenter(a, b, c);
-          const radius = Math.hypot(center[0] - a[0], center[1] - a[1]);
-          return Math.hypot(center[0] - p[0], center[1] - p[1]) <= radius;
-        }
-      
-        function triangulate(points) {
-          const triangles = [];
-          const n = points.length;
-      
-          for (let i = 0; i < n; i++) {
-            for (let j = i + 1; j < n; j++) {
-              for (let k = j + 1; k < n; k++) {
-                const triangle = [points[i], points[j], points[k]];
-                
-                const isValid = !points.some((p, idx) => 
-                  idx !== i && idx !== j && idx !== k && 
-                  inCircumcircle(points[i], points[j], points[k], p)
-                );
-      
-                if (isValid) {
-                  triangles.push(triangle);
+    
+        Triangle.prototype.calculateCircumcircle = function() {
+            const [ax, ay] = this.a;
+            const [bx, by] = this.b;
+            const [cx, cy] = this.c;
+    
+            const d = 2 * (ax * (by - cy) + bx * (cy - ay) + cx * (ay - by));
+            if (Math.abs(d) < EPSILON) return null; // Collinear points
+    
+            const a2 = ax * ax + ay * ay;
+            const b2 = bx * bx + by * by;
+            const c2 = cx * cx + cy * cy;
+    
+            const ux = (a2 * (by - cy) + b2 * (cy - ay) + c2 * (ay - by)) / d;
+            const uy = (a2 * (cx - bx) + b2 * (ax - cx) + c2 * (bx - ax)) / d;
+            const radius = Math.hypot(ux - ax, uy - ay);
+    
+            return { x: ux, y: uy, radius };
+        };
+    
+        // Bowyer-Watson algorithm implementation
+        const superTriangle = this.createSuperTriangle(points);
+        let triangles = [new Triangle(superTriangle[0], superTriangle[1], superTriangle[2])];
+    
+        points.forEach(point => {
+            const badTriangles = [];
+            triangles.forEach(triangle => {
+                if (triangle.circumcircle && 
+                    Math.hypot(point[0] - triangle.circumcircle.x, 
+                              point[1] - triangle.circumcircle.y) <= triangle.circumcircle.radius) {
+                    badTriangles.push(triangle);
                 }
-              }
-            }
-          }
-      
-          return triangles;
-        }
-      
-        return triangulate(points);
-      }
+            });
+    
+            const polygon = [];
+            badTriangles.forEach(triangle => {
+                triangle.edges.forEach(edge => {
+                    const edgeKey = edge.map(p => `${p[0]},${p[1]}`).sort().join('-');
+                    const shared = badTriangles.some(other => 
+                        other !== triangle && 
+                        other.edges.some(e => 
+                            e[0] === edge[1] && e[1] === edge[0]
+                        )
+                    );
+                    if (!shared) polygon.push(edge);
+                });
+            });
+    
+            triangles = triangles.filter(t => !badTriangles.includes(t));
+            polygon.forEach(edge => {
+                triangles.push(new Triangle(edge[0], edge[1], point));
+            });
+        });
+    
+        // Filter out triangles with super triangle vertices
+        const superPoints = new Set(superTriangle.map(p => `${p[0]},${p[1]}`));
+        return triangles
+            .filter(t => 
+                !superPoints.has(`${t.a[0]},${t.a[1]}`) &&
+                !superPoints.has(`${t.b[0]},${t.b[1]}`) &&
+                !superPoints.has(`${t.c[0]},${t.c[1]}`)
+            )
+            .map(t => [t.a, t.b, t.c]);
+    }
+    
+    createSuperTriangle(points) {
+        let minX = Infinity, minY = Infinity;
+        let maxX = -Infinity, maxY = -Infinity;
+    
+        points.forEach(([x, y]) => {
+            minX = Math.min(minX, x);
+            minY = Math.min(minY, y);
+            maxX = Math.max(maxX, x);
+            maxY = Math.max(maxY, y);
+        });
+    
+        const dx = (maxX - minX) * 10;
+        const dy = (maxY - minY) * 10;
+        return [
+            [minX - dx, minY - dy * 3],
+            [minX - dx, maxY + dy],
+            [maxX + dx * 3, maxY + dy]
+        ];
+    }
 
     generateDailyColor() {
         const today = new Date().toDateString();
@@ -202,7 +252,7 @@ class ColorComponent {
         this.addHistorySection(colorHistory);
 
         // Add preview section after history section
-        // this.addPreviewSection();
+        this.addPreviewSection();
 
         // Add test section
         // this.addTestSection();
