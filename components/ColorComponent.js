@@ -202,7 +202,7 @@ class ColorComponent {
         this.addHistorySection(colorHistory);
 
         // Add preview section after history section
-        this.addPreviewSection();
+        // this.addPreviewSection();
 
         // Add test section
         // this.addTestSection();

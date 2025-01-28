@@ -72,3 +72,5 @@ ipcMain.handle('delete-habit', async (event, habitId) => {
         return false;
     }
 });
+
+module.exports = { HABITS_FILE };
