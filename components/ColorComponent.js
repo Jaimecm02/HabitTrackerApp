@@ -255,7 +255,7 @@ class ColorComponent {
         this.addPreviewSection();
 
         // Add test section
-        // this.addTestSection();
+        this.addTestSection();
     }
 
     addDelaunayPattern(card) {

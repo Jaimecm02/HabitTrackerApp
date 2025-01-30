@@ -59,7 +59,7 @@ h1, h2 {
 }
 
 .habit-item {
-    background: #1e1e1e;
+    background: var(--card-dark-bg);
     padding: 1.5rem;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);

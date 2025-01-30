@@ -153,6 +153,43 @@ class Analytics {
         this.renderHabitComparisonChart(habits);
     }
 
+    getWeeklyCompletionData(habits) {
+        const now = new Date();
+        const startOfYear = new Date(now.getFullYear(), 0, 1); // January 1st
+        const weeksFromStart = Math.ceil((now - startOfYear) / (7 * 24 * 60 * 60 * 1000));
+        const weeks = weeksFromStart;
+        const labels = [];
+        const data = new Array(weeks).fill(0);
+
+        // Start from January 1st
+        const firstWeekStart = new Date(startOfYear);
+        firstWeekStart.setHours(0, 0, 0, 0);
+
+        for (let i = 0; i < weeks; i++) {
+            const weekStart = new Date(firstWeekStart);
+            weekStart.setDate(firstWeekStart.getDate() + (i * 7));
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 6);
+            weekEnd.setHours(23, 59, 59, 999);
+
+            const weekLabel = this.formatWeekLabel(weekStart, weekEnd);
+            labels.push(weekLabel);
+
+            // Count completions for this week across all habits
+            let weeklyTotal = 0;
+            habits.forEach(habit => {
+                const weekCompletions = habit.dates.filter(date => {
+                    const checkDate = new Date(date);
+                    return checkDate >= weekStart && checkDate <= weekEnd;
+                }).length;
+                weeklyTotal += weekCompletions;
+            });
+            data[i] = weeklyTotal;
+        }
+
+        return { labels, data };
+    }
+
     renderWeeklyTrendChart(habits) {
         const ctx = document.getElementById('weeklyTrendChart').getContext('2d');
         const weeklyData = this.getWeeklyCompletionData(habits);
@@ -176,7 +213,7 @@ class Analytics {
                 plugins: {
                     title: {
                         display: true,
-                        text: 'Weekly Completion Trend',
+                        text: 'Weekly Completion Trend (Since January 1st)',
                         color: '#fff'
                     },
                     legend: {
@@ -191,7 +228,11 @@ class Analytics {
                     },
                     x: {
                         grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                        ticks: { color: '#fff' }
+                        ticks: {
+                            color: '#fff',
+                            autoSkip: true,
+                            maxTicksLimit: 12 // Show approximately one label per month
+                        }
                     }
                 }
             }
@@ -202,7 +243,8 @@ class Analytics {
         const ctx = document.getElementById('habitComparisonChart').getContext('2d');
         const habitStats = habits.map(habit => ({
             name: habit.name,
-            count: habit.dates.length
+            count: habit.dates.length,
+            color: habit.color || this.generateRandomColor() // Fallback to random color if none exists
         })).sort((a, b) => b.count - a.count);
 
         this.charts.habitComparison = new Chart(ctx, {
@@ -212,7 +254,7 @@ class Analytics {
                 datasets: [{
                     label: 'Total Completions',
                     data: habitStats.map(h => h.count),
-                    backgroundColor: habits.map(h => h.color),
+                    backgroundColor: habitStats.map(h => h.color), // Use the color from habitStats
                     borderWidth: 1
                 }]
             },
@@ -244,28 +286,25 @@ class Analytics {
         });
     }
 
-    getWeeklyCompletionData(habits) {
-        const weeks = 4;
-        const labels = [];
-        const data = new Array(weeks).fill(0);
-        const now = new Date();
-        
-        for (let i = weeks - 1; i >= 0; i--) {
-            const weekStart = new Date(now);
-            weekStart.setDate(now.getDate() - (i * 7));
-            labels.push(`Week ${weeks - i}`);
-            
-            habits.forEach(habit => {
-                const weekCompletions = habit.dates.filter(date => {
-                    const checkDate = new Date(date);
-                    return checkDate >= weekStart && 
-                           checkDate < new Date(weekStart.getTime() + 7 * 24 * 60 * 60 * 1000);
-                }).length;
-                data[weeks - 1 - i] += weekCompletions;
-            });
-        }
+    formatWeekLabel(start, end) {
+        const startMonth = start.toLocaleString('default', { month: 'short' });
+        const endMonth = end.toLocaleString('default', { month: 'short' });
+        const startDay = start.getDate();
+        const endDay = end.getDate();
 
-        return { labels, data };
+        if (startMonth === endMonth) {
+            return `${startMonth} ${startDay}-${endDay}`;
+        }
+        return `${startMonth} ${startDay} - ${endMonth} ${endDay}`;
+    }
+
+    generateRandomColor() {
+        const letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
     }
 
     async refresh() {
