@@ -1,0 +1,129 @@
+@import './variables.css';
+
+.welcome-container {
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.welcome-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    animation: fadeIn 0.8s ease-in;
+}
+
+.welcome-header h1 {
+    font-size: 2.5rem;
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+}
+
+.current-date {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+}
+
+.welcome-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.info-card {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    border: var(--card-border);
+}
+
+.info-card h2 {
+    color: var(--text-color);
+    margin-bottom: 1rem;
+}
+
+.info-card p {
+    color: var(--text-secondary);
+    margin: 0.5rem 0;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.habits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.habit-card {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    box-shadow: var(--shadow);
+    border: var(--card-border);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.habit-status {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.habit-status.completed {
+    background-color: #2ecc71;
+    position: relative;
+}
+
+.habit-status.completed::after {
+    content: "✓";
+    color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 14px;
+}
+
+.habit-status.pending {
+    background-color: #e74c3c;
+}
+
+.habit-details {
+    flex-grow: 1;
+}
+
+.habit-details h3 {
+    margin: 0;
+    color: var(--text-color);
+    font-size: 1.1rem;
+}
+
+.habit-details p {
+    margin: 0.25rem 0 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+#newHabitBtn, #viewStatsBtn {
+    background: var(--primary-color);
+    color: var(--text-color);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    margin: 0.5rem;
+    transition: opacity 0.2s;
+}
+
+#newHabitBtn:hover, #viewStatsBtn:hover {
+    opacity: 0.9;
+}
+

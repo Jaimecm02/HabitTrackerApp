@@ -1,22 +1,18 @@
 :root {
-    --primary-bg: #121212;
-    --card-bg: #1a1a1a;
-    --card-dark-bg: #040404;
-    --text-color: #e0e0e0;
-    --text-secondary: #a0a0a0;
-    --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    --border-radius: 8px;
+    --primary-bg: #0a0a0b;
+    --card-bg: #141416;
+    --card-dark-bg: #0d0d0f;
+    --text-color: #ffffff;
+    --text-secondary: #8b8b8b;
+    --primary-color: #4a9eff;
+    --shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    --border-radius: 12px;
     --success-color: #2ecc71;
-
-    --gradient: conic-gradient(
-        from 90deg at 50% 50%,
-        rgb(251, 55, 60),
-        rgba(252, 114, 28, 1),
-        rgba(255, 220, 0, 1),
-        rgba(27, 206, 255, 1),
-        rgba(42, 107, 255, 1),
-        rgba(217, 41, 255, 1),
-        rgba(255, 10, 92, 1)
-      );
-      
+    --card-border: 1px solid rgba(255, 255, 255, 0.03);
+    
+    --gradient: linear-gradient(
+        135deg,
+        rgba(74, 158, 255, 0.5),
+        rgba(217, 41, 255, 0.5)
+    );
 }
