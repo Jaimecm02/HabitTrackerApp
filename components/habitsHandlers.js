@@ -73,4 +73,21 @@ ipcMain.handle('delete-habit', async (event, habitId) => {
     }
 });
 
+ipcMain.handle('update-habit', async (event, updatedHabit) => {
+    try {
+        const habits = loadHabits();
+        const habitIndex = habits.findIndex(h => h.id === updatedHabit.id);
+        if (habitIndex !== -1) {
+            habits[habitIndex] = updatedHabit;
+            saveHabits(habits);
+            event.sender.send('habits-updated');
+            return updatedHabit;
+        }
+        return null;
+    } catch (error) {
+        console.error('Error updating habit:', error);
+        return null;
+    }
+});
+
 module.exports = { HABITS_FILE };

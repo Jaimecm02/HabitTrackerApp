@@ -21,6 +21,17 @@ class HabitTracker {
                 </div>
                 <div class="habits-list"></div>
             </div>
+            <div id="editHabitModal" class="modal">
+                <div class="modal-content">
+                    <h3>Edit Habit</h3>
+                    <input type="text" id="editHabitName" placeholder="Habit name">
+                    <input type="color" id="editHabitColor">
+                    <div class="modal-buttons">
+                        <button id="saveHabitChanges">Save</button>
+                        <button id="cancelHabitEdit">Cancel</button>
+                    </div>
+                </div>
+            </div>
         `;
 
         await this.bindEvents();
@@ -150,13 +161,10 @@ class HabitTracker {
                 </div>
                 <div class="habit-buttons">
                     <button class="complete-today-btn">Complete Today</button>
-                    <div class="dropdown">
-                        <button class="menu-btn">⋮</button>
-                        <div class="dropdown-content">
-                            <button class="change-color-btn">Change Color</button>
-                            <button class="delete-habit-btn">Delete Habit</button>
-                        </div>
-                    </div>
+                    <button class="edit-habit-btn">
+                        <svg width="16" height="16"><use href="#icon-pencil"/></svg>
+                        Edit
+                    </button>
                 </div>
             </div>
         `;
@@ -179,46 +187,84 @@ class HabitTracker {
             }
         });
 
-        // Add click handlers for dropdown menu
-        const deleteButton = habitDiv.querySelector('.delete-habit-btn');
-        deleteButton.addEventListener('click', async () => {
+        // Add edit button handler
+        const editButton = habitDiv.querySelector('.edit-habit-btn');
+        editButton.addEventListener('click', () => this.showEditModal(habit));
+
+        habitDiv.appendChild(yearGrid);
+        return habitDiv;
+    }
+
+    showEditModal(habit) {
+        const modal = this.container.querySelector('#editHabitModal');
+        const nameInput = modal.querySelector('#editHabitName');
+        const colorInput = modal.querySelector('#editHabitColor');
+        const saveButton = modal.querySelector('#saveHabitChanges');
+        const cancelButton = modal.querySelector('#cancelHabitEdit');
+        
+        // Create delete button
+        let deleteButton = modal.querySelector('#deleteHabit');
+        if (!deleteButton) {
+            deleteButton = document.createElement('button');
+            deleteButton.id = 'deleteHabit';
+            deleteButton.textContent = 'Delete Habit';
+            modal.querySelector('.modal-buttons').prepend(deleteButton);
+        }
+
+        nameInput.value = habit.name;
+        colorInput.value = habit.color;
+        modal.style.display = 'block';
+
+        const cleanup = () => {
+            saveButton.removeEventListener('click', handleSave);
+            cancelButton.removeEventListener('click', handleCancel);
+            deleteButton.removeEventListener('click', handleDelete);
+            if (deleteButton.parentElement) {
+                deleteButton.remove();
+            }
+        };
+
+        const handleSave = async () => {
+            const updatedHabit = {
+                ...habit,
+                name: nameInput.value.trim(),
+                color: colorInput.value
+            };
+
+            if (!updatedHabit.name) return;
+
+            const result = await this.ipcRenderer.invoke('update-habit', updatedHabit);
+            if (result) {
+                const habitIndex = this.habits.findIndex(h => h.id === habit.id);
+                if (habitIndex !== -1) {
+                    this.habits[habitIndex] = result;
+                    this.renderHabits();
+                }
+            }
+            modal.style.display = 'none';
+            cleanup();
+        };
+
+        const handleCancel = () => {
+            modal.style.display = 'none';
+            cleanup();
+        };
+
+        const handleDelete = async () => {
             if (confirm(`Are you sure you want to delete "${habit.name}"?`)) {
                 const success = await this.ipcRenderer.invoke('delete-habit', habit.id);
                 if (success) {
                     this.habits = this.habits.filter(h => h.id !== habit.id);
                     this.renderHabits();
+                    modal.style.display = 'none';
+                    cleanup();
                 }
             }
-        });
+        };
 
-        // Add color change handler
-        const changeColorBtn = habitDiv.querySelector('.change-color-btn');
-        changeColorBtn.addEventListener('click', () => {
-            const colorInput = document.createElement('input');
-            colorInput.type = 'color';
-            colorInput.value = habit.color;
-            colorInput.style.display = 'none';
-            document.body.appendChild(colorInput);
-
-            colorInput.addEventListener('change', async () => {
-                const newColor = colorInput.value;
-                const updatedHabit = { ...habit, color: newColor };
-                const result = await this.ipcRenderer.invoke('update-habit', updatedHabit);
-                if (result) {
-                    const habitIndex = this.habits.findIndex(h => h.id === habit.id);
-                    if (habitIndex !== -1) {
-                        this.habits[habitIndex] = result;
-                        this.renderHabits();
-                    }
-                }
-                document.body.removeChild(colorInput);
-            });
-
-            colorInput.click();
-        });
-
-        habitDiv.appendChild(yearGrid);
-        return habitDiv;
+        saveButton.addEventListener('click', handleSave);
+        cancelButton.addEventListener('click', handleCancel);
+        deleteButton.addEventListener('click', handleDelete);
     }
 
     createYearGrid(habit) {
