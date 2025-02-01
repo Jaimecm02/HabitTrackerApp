@@ -1,8 +1,8 @@
-# Habit Tracker Desktop Application
+# 📱 Habit Tracker Desktop Application
 
 A desktop application built with Electron.
 
-## Features
+## ✨ Features
 
 - Manage user habits: Add, delete, and mark habits as complete.
 - Streak tracking: Visual feedback on progress with streak animations.
@@ -10,7 +10,9 @@ A desktop application built with Electron.
 - Daily colors: Generate and display daily colors with special effects.
 - 3D card effects: Dynamic 3D effects for color cards.
 
-## Installation
+## 🚀 Getting Started
+
+### Installation
 
 1. Clone this repository
 2. Install dependencies:
@@ -18,14 +20,14 @@ A desktop application built with Electron.
 npm install
 ```
 
-## Development
+### Development
 
 To run the application in development mode:
 ```sh
 npm start
 ```
 
-## Building
+### Building
 
 To create a new version:
 
@@ -42,22 +44,22 @@ npm run package
 npm run make
 ```
 
-## Requirements
+## 🔧 Requirements
 
 - Node.js 14.x or higher
 - npm 6.x or higher
 
-## Components
+## 🏗️ Core Components
 
-### Habit Tracker
+### 📋 Habit Tracker
 The Habit Tracker component is responsible for managing user habits. It allows users to add new habits, delete existing ones, and mark habits as complete for the day. The component also calculates streaks and displays them, providing visual feedback on the user's progress.
 
 ![Habit Tracker](assets/habittracker.png)
 
-**Effects Used:**
+**✨ Effects Used:**
 - Streak animations: The streak animations provide visual feedback on the user's progress. Different streak levels (bronze, silver, gold, platinum, diamond) are represented with unique animations and colors. The streak count is displayed with a flame icon that animates based on the streak level.
 
-**Streak Levels:**
+**🔥 Streak Levels:**
 - Bronze: 7+ days
 - Silver: 30+ days
 - Gold: 90+ days
@@ -66,19 +68,19 @@ The Habit Tracker component is responsible for managing user habits. It allows u
 
 ![Streak Previews](assets/streakpreviews.png)
 
-### Analytics
+### 📊 Analytics
 The Analytics component provides visual analytics for the habits. It includes features such as weekly trends and habit comparisons. Users can see their total habits, completion rates for the current month, best streaks, and consistency percentages. The component uses Chart.js to render interactive charts.
 
 ![Analytics](assets/analytics.png)
 
-**Effects Used:**
+**✨ Effects Used:**
 - Glowing borders: The cards in the Analytics component have glowing borders that react to the cursor. When the user hovers over a card, the border glows and follows the cursor, creating a dynamic and engaging visual effect.
 
 **Glowing Borders Preview:**
 
 ![Glowing Borders](assets/cursorglowtop.png)
 
-### Color Component
+### 🎨 Color Component
 The Color Component generates and displays daily colors. It includes special effects like holographic and gem patterns. The component saves the daily color to local storage and maintains a history of past colors. 
 
 ![Daily Color](assets/colorcomponent.png)
@@ -86,24 +88,16 @@ The Color Component generates and displays daily colors. It includes special eff
 **3D Card Effect:**
 The Color Component features a 3D card effect that enhances the visual appeal of the color cards. When the user moves the mouse over a card, the card tilts in response to the cursor's position, creating a dynamic 3D effect. This effect is achieved using CSS transforms and JavaScript event listeners to track the mouse movement.
 
-**Card Effects and Chances:**
-- **Normal Card:** A single solid color card. This is the most common type.
-![alt text](assets/base-card.png)
-
-- **Holographic Card:** A card with a holographic effect. There is a 3.5% chance of 
-generating a holographic card.
-![alt text](assets/holo-card.png)
-
-- **Gradient Card:** A card with a gradient transition between two colors. There is a 6.5% chance of generating a gradient card.
-![alt text](assets/gradient-card.png)
-
-- **Gem Card:** A card with a gem pattern created using Delaunay triangulation. There is a 1% chance of generating a gem card.
-![alt text](assets/gem-card.png)
+**🌟 Card Effects and Chances:**
+- **Standard:** A single solid color card
+- **Holographic (3.5%):** A card with a holographic effect
+- **Gradient (6.5%):** A card with a gradient transition
+- **Gem (1%):** A card with a gem pattern using Delaunay triangulation
 
 It also provides a preview section to showcase different types of color cards, including normal, holographic, gradient, and gem cards.
 
 ![Card types](assets/cardtypes.png)
 
-## License
+## 📄 License
 
 MIT License
