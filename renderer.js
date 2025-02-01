@@ -5,6 +5,16 @@ const ColorComponent = require('./components/ColorComponent');
 const WelcomePage = require('./components/welcomePage');
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Load the SVG icons
+    fetch('assets/icons.svg')
+        .then(response => response.text())
+        .then(data => {
+            const div = document.createElement('div');
+            div.style.display = 'none';
+            div.innerHTML = data;
+            document.body.insertBefore(div, document.body.firstChild);
+        });
+
     const habitTracker = new HabitTracker('habitComponent', ipcRenderer);
     const analytics = new Analytics('analyticsComponent', ipcRenderer);
     new ColorComponent();
