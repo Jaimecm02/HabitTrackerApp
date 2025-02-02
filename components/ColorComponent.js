@@ -1,103 +1,12 @@
+const GemPattern = require('./GemPattern');
+const WebPattern = require('./WebPattern');
+
 class ColorComponent {
     constructor() {
         this.container = document.getElementById('colorComponent');
+        this.gemPattern = new GemPattern();
+        this.webPattern = new WebPattern();
         this.setupComponent();
-    }
-
-    delaunayTriangulation(points) {
-        // Helper functions
-        const EPSILON = 1e-8;
-        
-        function Triangle(a, b, c) {
-            this.a = a;
-            this.b = b;
-            this.c = c;
-            this.edges = [[a, b], [b, c], [c, a]];
-            this.circumcircle = this.calculateCircumcircle();
-        }
-    
-        Triangle.prototype.calculateCircumcircle = function() {
-            const [ax, ay] = this.a;
-            const [bx, by] = this.b;
-            const [cx, cy] = this.c;
-    
-            const d = 2 * (ax * (by - cy) + bx * (cy - ay) + cx * (ay - by));
-            if (Math.abs(d) < EPSILON) return null; // Collinear points
-    
-            const a2 = ax * ax + ay * ay;
-            const b2 = bx * bx + by * by;
-            const c2 = cx * cx + cy * cy;
-    
-            const ux = (a2 * (by - cy) + b2 * (cy - ay) + c2 * (ay - by)) / d;
-            const uy = (a2 * (cx - bx) + b2 * (ax - cx) + c2 * (bx - ax)) / d;
-            const radius = Math.hypot(ux - ax, uy - ay);
-    
-            return { x: ux, y: uy, radius };
-        };
-    
-        // Bowyer-Watson algorithm implementation
-        const superTriangle = this.createSuperTriangle(points);
-        let triangles = [new Triangle(superTriangle[0], superTriangle[1], superTriangle[2])];
-    
-        points.forEach(point => {
-            const badTriangles = [];
-            triangles.forEach(triangle => {
-                if (triangle.circumcircle && 
-                    Math.hypot(point[0] - triangle.circumcircle.x, 
-                              point[1] - triangle.circumcircle.y) <= triangle.circumcircle.radius) {
-                    badTriangles.push(triangle);
-                }
-            });
-    
-            const polygon = [];
-            badTriangles.forEach(triangle => {
-                triangle.edges.forEach(edge => {
-                    const edgeKey = edge.map(p => `${p[0]},${p[1]}`).sort().join('-');
-                    const shared = badTriangles.some(other => 
-                        other !== triangle && 
-                        other.edges.some(e => 
-                            e[0] === edge[1] && e[1] === edge[0]
-                        )
-                    );
-                    if (!shared) polygon.push(edge);
-                });
-            });
-    
-            triangles = triangles.filter(t => !badTriangles.includes(t));
-            polygon.forEach(edge => {
-                triangles.push(new Triangle(edge[0], edge[1], point));
-            });
-        });
-    
-        // Filter out triangles with super triangle vertices
-        const superPoints = new Set(superTriangle.map(p => `${p[0]},${p[1]}`));
-        return triangles
-            .filter(t => 
-                !superPoints.has(`${t.a[0]},${t.a[1]}`) &&
-                !superPoints.has(`${t.b[0]},${t.b[1]}`) &&
-                !superPoints.has(`${t.c[0]},${t.c[1]}`)
-            )
-            .map(t => [t.a, t.b, t.c]);
-    }
-    
-    createSuperTriangle(points) {
-        let minX = Infinity, minY = Infinity;
-        let maxX = -Infinity, maxY = -Infinity;
-    
-        points.forEach(([x, y]) => {
-            minX = Math.min(minX, x);
-            minY = Math.min(minY, y);
-            maxX = Math.max(maxX, x);
-            maxY = Math.max(maxY, y);
-        });
-    
-        const dx = (maxX - minX) * 10;
-        const dy = (maxY - minY) * 10;
-        return [
-            [minX - dx, minY - dy * 3],
-            [minX - dx, maxY + dy],
-            [maxX + dx * 3, maxY + dy]
-        ];
     }
 
     generateDailyColor() {
@@ -111,11 +20,12 @@ class ColorComponent {
                 secondColor: storedData.secondColor,
                 holographic: storedData.holographic,
                 gradient: storedData.gradient,
-                gem: storedData.gem  // Add gem property
+                gem: storedData.gem,
+                web: storedData.web
             };
         }
 
-        const { color, secondColor, holographic, gradient, gem } = this.generateRandomColor();
+        const { color, secondColor, holographic, gradient, gem, web } = this.generateRandomColor();
 
         localStorage.setItem('dailyColor', JSON.stringify({
             date: today,
@@ -123,10 +33,11 @@ class ColorComponent {
             secondColor: secondColor,
             holographic: holographic,
             gradient: gradient,
-            gem: gem  // Add gem property
+            gem: gem,
+            web: web
         }));
 
-        return { color, secondColor, holographic, gradient, gem };
+        return { color, secondColor, holographic, gradient, gem, web };
     }
 
     generateRandomColor() {
@@ -140,9 +51,12 @@ class ColorComponent {
 
         const holographic = Math.random() < 0.035; // 3.5% chance of holographic color (one every 30 days)
         const gradient = Math.random() < 0.065; // 6.5% chance of gradient color (two every 30 days)
-        const gem = Math.random() < 0.01; // 1% chance of gem pattern
+        
+        const patternRoll = Math.random();
+        const gem = patternRoll < 0.01; // 1% chance for gem pattern
+        const web = patternRoll >= 0.01 && patternRoll < 0.02; // 1% chance for web pattern
 
-        return { color, secondColor, holographic, gradient, gem };
+        return { color, secondColor, holographic, gradient, gem, web };
     }
 
     hexToRgb(hex) {
@@ -158,7 +72,7 @@ class ColorComponent {
         return brightness > 128 ? '#000000' : '#FFFFFF';
     }
 
-    saveColorToHistory(color, date, holographic, gradient, secondColor, gem) {
+    saveColorToHistory(color, date, holographic, gradient, secondColor, gem, web) {
         const history = localStorage.getItem('colorHistory') || '[]';
         const historyArray = JSON.parse(history);
         
@@ -173,7 +87,8 @@ class ColorComponent {
                 rgb2,
                 holographic, 
                 gradient,
-                gem
+                gem,
+                web
             });
             localStorage.setItem('colorHistory', JSON.stringify(historyArray));
         }
@@ -186,13 +101,13 @@ class ColorComponent {
 
     setupComponent() {
         this.container.innerHTML = '';
-        const { color, secondColor, holographic, gradient, gem } = this.generateDailyColor();
+        const { color, secondColor, holographic, gradient, gem, web } = this.generateDailyColor();
         const rgbColor = this.hexToRgb(color);
         const textColor = this.calculateContrastColor(color);
         const today = new Date().toDateString();
 
         // Save today's color to history with all properties
-        this.saveColorToHistory(color, today, holographic, gradient, secondColor, gem);  // Added gem parameter
+        this.saveColorToHistory(color, today, holographic, gradient, secondColor, gem, web);
 
         // Get updated color history
         const colorHistory = this.getColorHistory();
@@ -200,7 +115,7 @@ class ColorComponent {
 
         // Create main color card
         const card = document.createElement('div');
-        card.className = `color-card${holographic ? ' holographic' : ''}${gem ? ' gem' : ''}`;  // Added gem class
+        card.className = `color-card${holographic ? ' holographic' : ''}${gem ? ' gem' : ''}${web ? ' web' : ''}`;
         if (gradient) {
             card.style.background = `linear-gradient(45deg, ${color}, ${secondColor})`;
         } else {
@@ -208,7 +123,9 @@ class ColorComponent {
         }
 
         if (gem) {
-            this.addDelaunayPattern(card);
+            this.gemPattern.addDelaunayPattern(card);
+        } else if (web) {
+            this.webPattern.addPattern(card);
         }
 
         const colorInfo = document.createElement('div');
@@ -255,123 +172,7 @@ class ColorComponent {
         this.addPreviewSection();
 
         // Add test section
-        this.addTestSection();
-    }
-
-    addDelaunayPattern(card) {
-        const canvas = document.createElement('canvas');
-        canvas.className = 'delaunay-pattern';
-        
-        // Handle high DPI displays
-        const updateCanvas = () => {
-            const rect = card.getBoundingClientRect();
-            const dpr = window.devicePixelRatio || 1;
-            
-            canvas.width = rect.width * dpr;
-            canvas.height = rect.height * dpr;
-            canvas.style.width = `${rect.width}px`;
-            canvas.style.height = `${rect.height}px`;
-            
-            const ctx = canvas.getContext('2d');
-            ctx.scale(dpr, dpr);
-            
-            // Generate better distributed points using golden ratio
-            const points = this.generatePoints(rect.width, rect.height);
-            const triangles = this.delaunayTriangulation(points);
-            
-            this.drawGemPattern(ctx, triangles, rect.width, rect.height);
-        };
-
-        // Initial render
-        card.appendChild(canvas);
-        // Use ResizeObserver to handle card size changes
-        const observer = new ResizeObserver(updateCanvas);
-        observer.observe(card);
-        
-        // Store observer reference for cleanup
-        card._resizeObserver = observer;
-    }
-
-    generatePoints(width, height) {
-        const points = [
-            [0, 0],
-            [0, height],
-            [width, 0],
-            [width, height]
-        ];
-        
-        const pointCount = 50;
-        const goldenRatio = (1 + Math.sqrt(5)) / 2;
-        const angleStep = Math.PI * 2 * goldenRatio;
-        
-        // Generate points in a spiral pattern for better distribution
-        for (let i = 0; i < pointCount; i++) {
-            const distance = (i / pointCount) * Math.min(width, height) / 2;
-            const angle = i * angleStep;
-            
-            const x = width/2 + Math.cos(angle) * distance;
-            const y = height/2 + Math.sin(angle) * distance;
-            
-            points.push([x, y]);
-        }
-        
-        // Add some controlled randomness
-        for (let i = 0; i < pointCount/2; i++) {
-            points.push([
-                Math.random() * width,
-                Math.random() * height
-            ]);
-        }
-        
-        return points;
-    }
-
-    drawGemPattern(ctx, triangles, width, height) {
-        ctx.clearRect(0, 0, width, height);
-        
-        triangles.forEach(triangle => {
-            const centerX = (triangle[0][0] + triangle[1][0] + triangle[2][0]) / 3;
-            const centerY = (triangle[0][1] + triangle[1][1] + triangle[2][1]) / 3;
-            
-            const distanceFromCenter = Math.hypot(
-                centerX - width / 2,
-                centerY - height / 2
-            ) || 0; // Ensure we have a number, not NaN
-            
-            const maxDistance = Math.hypot(width / 2, height / 2) || 1; // Prevent division by zero
-            const proximity = Math.max(0, Math.min(1, 1 - (distanceFromCenter / maxDistance))) || 0;
-            
-            // Create more gem-like gradients with safe opacity values
-            const gradient = ctx.createLinearGradient(
-                triangle[0][0] || 0, 
-                triangle[0][1] || 0,
-                triangle[2][0] || 0, 
-                triangle[2][1] || 0
-            );
-            
-            // Ensure opacity values are valid numbers between 0 and 1
-            const baseOpacity1 = Math.max(0.1, Math.min(0.4, 0.1 + proximity * 0.3)) || 0.1;
-            const baseOpacity2 = Math.max(0.05, Math.min(0.2, 0.05 + proximity * 0.15)) || 0.05;
-            
-            gradient.addColorStop(0, `rgba(255, 255, 255, ${baseOpacity1})`);
-            gradient.addColorStop(0.5, `rgba(255, 255, 255, ${baseOpacity2})`);
-            gradient.addColorStop(1, `rgba(255, 255, 255, ${baseOpacity1})`);
-            
-            ctx.beginPath();
-            ctx.moveTo(triangle[0][0] || 0, triangle[0][1] || 0);
-            ctx.lineTo(triangle[1][0] || 0, triangle[1][1] || 0);
-            ctx.lineTo(triangle[2][0] || 0, triangle[2][1] || 0);
-            ctx.closePath();
-            
-            ctx.fillStyle = gradient;
-            ctx.fill();
-            
-            // Add subtle edges with safe opacity value
-            const edgeOpacity = Math.max(0.1, Math.min(0.3, 0.1 + proximity * 0.2)) || 0.1;
-            ctx.strokeStyle = `rgba(255, 255, 255, ${edgeOpacity})`;
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
-        });
+        // this.addTestSection();
     }
 
     addHistorySection(colorHistory) {
@@ -387,7 +188,7 @@ class ColorComponent {
         
         colorHistory.reverse().forEach((item, index) => {
             const historyCard = document.createElement('div');
-            historyCard.className = `history-card${item.holographic ? ' holographic' : ''}${item.gem ? ' gem' : ''}`;  // Added gem class
+            historyCard.className = `history-card${item.holographic ? ' holographic' : ''}${item.gem ? ' gem' : ''}${item.web ? ' web' : ''}`;
             if (item.gradient) {
                 historyCard.style.background = `linear-gradient(45deg, ${item.color}, ${item.secondColor})`;
             } else {
@@ -395,7 +196,9 @@ class ColorComponent {
             }
             
             if (item.gem) {
-                this.addDelaunayPattern(historyCard);
+                this.gemPattern.addDelaunayPattern(historyCard);
+            } else if (item.web) {
+                this.webPattern.addPattern(historyCard);
             }
 
             const historyInfo = document.createElement('div');
@@ -441,16 +244,16 @@ class ColorComponent {
         previewContainer.className = 'preview-container';
 
         // Create example cards
-        const normalCard = this.createPreviewCard('#FF5733', false, false, false, 'Normal Card');
-        const holoCard = this.createPreviewCard('#4287f5', true, false, false, 'Holographic Card');
-        const gradientCard = this.createPreviewCard('#33ff57', false, true, false, 'Gradient Card', '#5733ff');
-        const gemCard = this.createPreviewCard('#f54287', false, false, true, 'Gem Card');
-        const gradientGemCard = this.createPreviewCard('#ff9933', false, true, true, 'Gradient Gem Card', '#9933ff');
-        const holoGemCard = this.createPreviewCard('#87f542', true, false, true, 'Holographic Gem Card');
-        const holoGradientCard = this.createPreviewCard('#42f587', true, true, false, 'Holographic Gradient Card', '#f58742');
-        const holoGradientGemCard = this.createPreviewCard('#8742f5', true, true, true, 'Holographic Gradient Gem Card', '#f54287');
+        const normalCard = this.createPreviewCard('#FF5733', false, false, false, false, 'Normal Card');
+        const holoCard = this.createPreviewCard('#4287f5', true, false, false, false, 'Holographic Card');
+        const gradientCard = this.createPreviewCard('#33ff57', false, true, false, false, 'Gradient Card', '#5733ff');
+        const gemCard = this.createPreviewCard('#f54287', false, false, true, false, 'Gem Card');
+        const webCard = this.createPreviewCard('#87f542', false, false, false, true, 'Web Card');
+        const gradientWebCard = this.createPreviewCard('#ff9933', false, true, false, true, 'Gradient Web Card', '#9933ff');
+        const holoWebCard = this.createPreviewCard('#42f587', true, false, false, true, 'Holographic Web Card');
+        const holoGradientWebCard = this.createPreviewCard('#8742f5', true, true, false, true, 'Holographic Gradient Web Card', '#f54287');
 
-        [normalCard, holoCard, gradientCard, gemCard, gradientGemCard, holoGemCard, holoGradientCard, holoGradientGemCard].forEach(card => {
+        [normalCard, holoCard, gradientCard, gemCard, webCard, gradientWebCard, holoWebCard, holoGradientWebCard].forEach(card => {
             previewContainer.appendChild(card);
             card.addEventListener('mousemove', (e) => this.handleMouseMove(e, card));
             card.addEventListener('mouseleave', (e) => this.handleMouseLeave(e, card));
@@ -461,9 +264,9 @@ class ColorComponent {
         this.container.appendChild(previewSection);
     }
 
-    createPreviewCard(color, holographic, gradient, gem, label, secondColor = '#ffffff') {
+    createPreviewCard(color, holographic, gradient, gem, web, label, secondColor = '#ffffff') {
         const card = document.createElement('div');
-        card.className = `preview-card${holographic ? ' holographic' : ''}${gem ? ' gem' : ''}`;
+        card.className = `preview-card${holographic ? ' holographic' : ''}${gem ? ' gem' : ''}${web ? ' web' : ''}`;
         
         if (gradient) {
             card.style.background = `linear-gradient(45deg, ${color}, ${secondColor})`;
@@ -472,7 +275,9 @@ class ColorComponent {
         }
 
         if (gem) {
-            this.addDelaunayPattern(card);
+            this.gemPattern.addDelaunayPattern(card);
+        } else if (web) {
+            this.webPattern.addPattern(card);
         }
 
         const cardLabel = document.createElement('div');
@@ -496,7 +301,7 @@ class ColorComponent {
         testContainer.className = 'test-container';
 
         for (let i = 0; i < 50; i++) {
-            const { color, secondColor, holographic, gradient, gem } = this.generateRandomColor();
+            const { color, secondColor, holographic, gradient, gem, web } = this.generateRandomColor();
             const testCard = document.createElement('div');
             testCard.className = `history-card${holographic ? ' holographic' : ''}`; // Use the same class as history cards
             if (gradient) {
@@ -507,7 +312,10 @@ class ColorComponent {
 
             if (gem) {
                 testCard.classList.add('gem');
-                this.addDelaunayPattern(testCard);
+                this.gemPattern.addDelaunayPattern(testCard);
+            } else if (web) {
+                testCard.classList.add('web');
+                this.webPattern.addPattern(testCard);
             }
 
             const testInfo = document.createElement('div');
@@ -515,8 +323,8 @@ class ColorComponent {
             testInfo.style.color = this.calculateContrastColor(color);
             testInfo.style.fontWeight = 'bold';
             testInfo.innerHTML = gradient ? 
-                `HEX: ${color.toUpperCase()} → ${secondColor.toUpperCase()}<br>RGB_1(${this.hexToRgb(color)})<br>RGB_2(${this.hexToRgb(secondColor)})<br>GEM: ${gem}` :
-                `HEX: ${color.toUpperCase()}<br>RGB(${this.hexToRgb(color)})<br>GEM: ${gem}`;
+                `HEX: ${color.toUpperCase()} → ${secondColor.toUpperCase()}<br>RGB_1(${this.hexToRgb(color)})<br>RGB_2(${this.hexToRgb(secondColor)})<br>GEM: ${gem}<br>WEB: ${web}` :
+                `HEX: ${color.toUpperCase()}<br>RGB(${this.hexToRgb(color)})<br>GEM: ${gem}<br>WEB: ${web}`;
 
             testCard.appendChild(testInfo);
             testContainer.appendChild(testCard);
@@ -550,7 +358,7 @@ class ColorComponent {
     }
 
     cleanup() {
-        document.querySelectorAll('.gem').forEach(card => {
+        document.querySelectorAll('.gem, .web').forEach(card => {
             if (card._resizeObserver) {
                 card._resizeObserver.disconnect();
             }
