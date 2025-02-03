@@ -6,6 +6,7 @@ class ColorComponent {
         this.container = document.getElementById('colorComponent');
         this.gemPattern = new GemPattern();
         this.webPattern = new WebPattern();
+        this.likedColors = JSON.parse(localStorage.getItem('likedColors') || '[]');
         this.setupComponent();
     }
 
@@ -161,6 +162,20 @@ class ColorComponent {
         card.appendChild(cardNumber);
         this.container.appendChild(card);
 
+        const cardData = {
+            color,
+            secondColor,
+            date: today,
+            holographic,
+            gradient,
+            gem,
+            web
+        };
+
+        // Add heart button to main card
+        const heartButton = this.createHeartButton(color, cardData);
+        card.appendChild(heartButton);
+
         // Add mouse move handlers to main card
         card.addEventListener('mousemove', (e) => this.handleMouseMove(e, card));
         card.addEventListener('mouseleave', (e) => this.handleMouseLeave(e, card));
@@ -221,6 +236,10 @@ class ColorComponent {
             historyCard.appendChild(historyInfo);
             historyCard.appendChild(historyCardNumber);
             historyContainer.appendChild(historyCard);
+
+            // Add heart button to history cards
+            const heartButton = this.createHeartButton(item.color, item);
+            historyCard.appendChild(heartButton);
 
             // Add mouse move handlers to history cards
             historyCard.addEventListener('mousemove', (e) => this.handleMouseMove(e, historyCard));
@@ -286,6 +305,7 @@ class ColorComponent {
         cardLabel.textContent = label;
         
         card.appendChild(cardLabel);
+
         return card;
     }
 
@@ -363,6 +383,63 @@ class ColorComponent {
                 card._resizeObserver.disconnect();
             }
         });
+    }
+
+    createHeartButton(color, cardData) {
+        const button = document.createElement('button');
+        button.className = `like-button${this.isColorLiked(color) ? ' liked' : ''}`;
+        button.innerHTML = `
+            <svg viewBox="0 0 24 24">
+                <path class="heart-path" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>`;
+        
+        const textColor = this.calculateContrastColor(color);
+        button.style.color = textColor;
+
+        button.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.toggleLikeColor(button, cardData);
+        });
+
+        return button;
+    }
+
+    toggleLikeColor(button, cardData) {
+        const isLiked = button.classList.toggle('liked');
+        
+        if (isLiked) {
+            this.likedColors.push(cardData);
+        } else {
+            const index = this.likedColors.findIndex(c => 
+                c.color === cardData.color && c.date === cardData.date
+            );
+            if (index !== -1) {
+                this.likedColors.splice(index, 1);
+            }
+        }
+
+        localStorage.setItem('likedColors', JSON.stringify(this.likedColors));
+
+        // Update all instances of this color in history
+        document.querySelectorAll('.history-card, .color-card').forEach(card => {
+            const heartBtn = card.querySelector('.like-button');
+            if (heartBtn && this.getCardColor(card) === cardData.color) {
+                heartBtn.className = `like-button${isLiked ? ' liked' : ''}`;
+            }
+        });
+    }
+
+    isColorLiked(color) {
+        return this.likedColors.some(c => c.color === color);
+    }
+
+    // Add new helper method to get card's color
+    getCardColor(card) {
+        const background = card.style.background || card.style.backgroundColor;
+        if (background.includes('linear-gradient')) {
+            return background.match(/#[a-fA-F0-9]{6}/g)[0];
+        }
+        return background;
     }
 }
 

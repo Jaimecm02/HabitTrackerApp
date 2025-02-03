@@ -247,7 +247,7 @@ h1, h2 {
 }
 
 .modal-content {
-    background-color: var(--card-dark-bg);
+    background-color: var(--primary-bg);
     padding: 2rem;
     border-radius: 8px;
     position: absolute;
