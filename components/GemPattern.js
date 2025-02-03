@@ -1,3 +1,5 @@
+const PointGeneration = require('./PointGeneration');
+
 class GemPattern {
     constructor() {
         this.EPSILON = 1e-8;
@@ -94,35 +96,7 @@ class GemPattern {
     }
 
     generatePoints(width, height) {
-        const points = [
-            [0, 0],
-            [0, height],
-            [width, 0],
-            [width, height]
-        ];
-        
-        const pointCount = 50;
-        const goldenRatio = (1 + Math.sqrt(5)) / 2;
-        const angleStep = Math.PI * 2 * goldenRatio;
-        
-        for (let i = 0; i < pointCount; i++) {
-            const distance = (i / pointCount) * Math.min(width, height) / 2;
-            const angle = i * angleStep;
-            
-            const x = width/2 + Math.cos(angle) * distance;
-            const y = height/2 + Math.sin(angle) * distance;
-            
-            points.push([x, y]);
-        }
-        
-        for (let i = 0; i < pointCount/2; i++) {
-            points.push([
-                Math.random() * width,
-                Math.random() * height
-            ]);
-        }
-        
-        return points;
+        return PointGeneration.generatePoints(width, height, { randomPointsFactor: 1/3 });
     }
 
     drawGemPattern(ctx, triangles, width, height) {
