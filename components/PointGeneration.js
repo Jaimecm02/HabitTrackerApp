@@ -1,7 +1,7 @@
 class PointGeneration {
     static generatePoints(width, height, options = {}) {
         const {
-            pointCount = 50,
+            pointCount = 20,
             randomPointsFactor = 1/3
         } = options;
 

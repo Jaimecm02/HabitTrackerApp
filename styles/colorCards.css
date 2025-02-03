@@ -1,4 +1,6 @@
 @import "variables.css";
+@import "holographic.css";
+@import "patterns.css";
 
 /* Color Component Styles */
 #colorComponent {
@@ -95,6 +97,31 @@
 
 .color-display:hover {
     opacity: 0.9;
+}
+
+/* Chinese Character and Translation Display */
+.chinese-character {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%) translateZ(20px);
+    font-size: 8rem;
+    font-family: "STKaiti", "KaiTi", "DFKai-SB", "KaiTi_GB2312", "SimKai", serif;
+    opacity: 0.8;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.chinese-translation {
+    position: absolute;
+    top: 65%;
+    left: 50%;
+    transform: translate(-50%, 0) translateZ(20px);
+    font-family: "STKaiti", "KaiTi", "DFKai-SB", "KaiTi_GB2312", "SimKai", serif;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+    opacity: 0.8;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* History Section Styles */
@@ -241,135 +268,6 @@
 
 .preview-card:hover {
     transform: scale(1.02);
-}
-
-/* Holographic Styles */
-.holographic {
-    position: relative;
-    overflow: hidden;
-    box-shadow: inset 0 0 0 2px rgba(192, 192, 192, 0.9),
-                inset 0 0 20px rgba(192, 192, 192, 0.6),
-                inset 0 0 30px rgba(255, 255, 255, 0.3),
-                0 0 15px rgba(192, 192, 192, 0.4),
-                0 0 25px rgba(255, 255, 255, 0.2);
-    animation: borderGlow 2s ease-in-out infinite alternate;
-}
-
-.holographic::before,
-.holographic::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    pointer-events: none;
-    border-radius: inherit;
-}
-
-.holographic::before {
-    background: linear-gradient(
-        125deg,
-        transparent 0%,
-        rgba(255, 255, 255, 0.1) 20%,
-        rgba(255, 255, 255, 0.3) 40%,
-        rgba(255, 255, 255, 0.5) 50%,
-        rgba(255, 255, 255, 0.3) 60%,
-        rgba(255, 255, 255, 0.1) 80%,
-        transparent 100%
-    );
-    background-size: 400% 400%;
-    animation: holographicShine 5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-    mix-blend-mode: overlay;
-    opacity: 0.8;
-}
-
-.holographic::after {
-    background: linear-gradient(
-        45deg,
-        rgba(255, 255, 255, 0.05) 0%,
-        rgba(255, 255, 255, 0.15) 100%
-    );
-    mix-blend-mode: color-dodge;
-    opacity: 0.6;
-}
-
-@keyframes holographicShine {
-    0%, 100% {
-        background-position: 100% 100%;
-    }
-    50% {
-        background-position: 0% 0%;
-    }
-}
-
-@keyframes borderGlow {
-    from {
-        box-shadow: inset 0 0 0 2px rgba(192, 192, 192, 0.9),
-                   inset 0 0 20px rgba(192, 192, 192, 0.6),
-                   inset 0 0 30px rgba(255, 255, 255, 0.3),
-                   0 0 15px rgba(192, 192, 192, 0.4),
-                   0 0 25px rgba(255, 255, 255, 0.2);
-    }
-    to {
-        box-shadow: inset 0 0 0 2px rgba(192, 192, 192, 1),
-                   inset 0 0 30px rgba(192, 192, 192, 0.8),
-                   inset 0 0 40px rgba(255, 255, 255, 0.4),
-                   0 0 25px rgba(192, 192, 192, 0.6),
-                   0 0 35px rgba(255, 255, 255, 0.3);
-    }
-}
-
-.holographic:hover::before {
-    animation-duration: 3s;
-}
-
-[class*="-card"][style*="linear-gradient"]:hover {
-    background-position: right bottom;
-}
-
-/* Delaunay Pattern Styles */
-.delaunay-pattern {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 1;
-}
-
-/* Web Pattern Styles */
-.voronoi-pattern {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 1;
-    mix-blend-mode: overlay;
-    opacity: 0.7;
-}
-
-.web .voronoi-pattern {
-    opacity: 0.7;
-}
-
-.web {
-    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.2);
-}
-
-.web:hover .voronoi-pattern {
-    opacity: 0.8;
-}
-
-.holographic.web {
-    box-shadow: inset 0 0 0 2px rgba(192, 192, 192, 0.9),
-                inset 0 0 20px rgba(192, 192, 192, 0.6),
-                inset 0 0 30px rgba(255, 255, 255, 0.4),
-                0 0 15px rgba(192, 192, 192, 0.4),
-                0 0 25px rgba(255, 255, 255, 0.3);
 }
 
 /* Like Button Styles */

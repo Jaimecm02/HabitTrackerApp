@@ -22,11 +22,12 @@ class ColorComponent {
                 holographic: storedData.holographic,
                 gradient: storedData.gradient,
                 gem: storedData.gem,
-                web: storedData.web
+                web: storedData.web,
+                chinese: storedData.chinese
             };
         }
 
-        const { color, secondColor, holographic, gradient, gem, web } = this.generateRandomColor();
+        const { color, secondColor, holographic, gradient, gem, web, chinese } = this.generateRandomColor();
 
         localStorage.setItem('dailyColor', JSON.stringify({
             date: today,
@@ -35,10 +36,11 @@ class ColorComponent {
             holographic: holographic,
             gradient: gradient,
             gem: gem,
-            web: web
+            web: web,
+            chinese: chinese
         }));
 
-        return { color, secondColor, holographic, gradient, gem, web };
+        return { color, secondColor, holographic, gradient, gem, web, chinese };
     }
 
     generateRandomColor() {
@@ -56,8 +58,51 @@ class ColorComponent {
         const patternRoll = Math.random();
         const gem = patternRoll < 0.01; // 1% chance for gem pattern
         const web = patternRoll >= 0.01 && patternRoll < 0.02; // 1% chance for web pattern
+        const chinese = patternRoll >= 0.02 && patternRoll < 0.03; // 1% chance for Chinese character
 
-        return { color, secondColor, holographic, gradient, gem, web };
+        return { color, secondColor, holographic, gradient, gem, web, chinese };
+    }
+
+    getRandomChineseCharacter() {
+        // Chinese characters with their English translations
+        const characters = {
+            '福': 'Fortune',
+            '禄': 'Wealth',
+            '寿': 'Longevity',
+            '喜': 'Joy',
+            '爱': 'Love',
+            '德': 'Virtue',
+            '智': 'Wisdom',
+            '信': 'Trust',
+            '仁': 'Kindness',
+            '勇': 'Courage',
+            '和': 'Peace',
+            '平': 'Balance',
+            '安': 'Safety',
+            '康': 'Health',
+            '宁': 'Tranquility'
+        };
+        const chars = Object.keys(characters);
+        const char = chars[Math.floor(Math.random() * chars.length)];
+        return { character: char, translation: characters[char] };
+    }
+
+    addChineseCharacter(container, color) {
+        const { character, translation } = this.getRandomChineseCharacter();
+        const textColor = this.calculateContrastColor(color);
+
+        const charElement = document.createElement('div');
+        charElement.className = 'chinese-character';
+        charElement.style.color = textColor;
+        charElement.textContent = character;
+
+        const translationElement = document.createElement('div');
+        translationElement.className = 'chinese-translation';
+        translationElement.style.color = textColor;
+        translationElement.textContent = translation;
+
+        container.appendChild(charElement);
+        container.appendChild(translationElement);
     }
 
     hexToRgb(hex) {
@@ -73,7 +118,7 @@ class ColorComponent {
         return brightness > 128 ? '#000000' : '#FFFFFF';
     }
 
-    saveColorToHistory(color, date, holographic, gradient, secondColor, gem, web) {
+    saveColorToHistory(color, date, holographic, gradient, secondColor, gem, web, chinese) {
         const history = localStorage.getItem('colorHistory') || '[]';
         const historyArray = JSON.parse(history);
         
@@ -89,7 +134,8 @@ class ColorComponent {
                 holographic, 
                 gradient,
                 gem,
-                web
+                web,
+                chinese
             });
             localStorage.setItem('colorHistory', JSON.stringify(historyArray));
         }
@@ -102,13 +148,13 @@ class ColorComponent {
 
     setupComponent() {
         this.container.innerHTML = '';
-        const { color, secondColor, holographic, gradient, gem, web } = this.generateDailyColor();
+        const { color, secondColor, holographic, gradient, gem, web, chinese } = this.generateDailyColor();
         const rgbColor = this.hexToRgb(color);
         const textColor = this.calculateContrastColor(color);
         const today = new Date().toDateString();
 
         // Save today's color to history with all properties
-        this.saveColorToHistory(color, today, holographic, gradient, secondColor, gem, web);
+        this.saveColorToHistory(color, today, holographic, gradient, secondColor, gem, web, chinese);
 
         // Get updated color history
         const colorHistory = this.getColorHistory();
@@ -116,7 +162,7 @@ class ColorComponent {
 
         // Create main color card
         const card = document.createElement('div');
-        card.className = `color-card${holographic ? ' holographic' : ''}${gem ? ' gem' : ''}${web ? ' web' : ''}`;
+        card.className = `color-card${holographic ? ' holographic' : ''}${gem ? ' gem' : ''}${web ? ' web' : ''}${chinese ? ' chinese' : ''}`;
         if (gradient) {
             card.style.background = `linear-gradient(45deg, ${color}, ${secondColor})`;
         } else {
@@ -127,6 +173,8 @@ class ColorComponent {
             this.gemPattern.addDelaunayPattern(card);
         } else if (web) {
             this.webPattern.addPattern(card);
+        } else if (chinese) {
+            this.addChineseCharacter(card, color);
         }
 
         const colorInfo = document.createElement('div');
@@ -169,7 +217,8 @@ class ColorComponent {
             holographic,
             gradient,
             gem,
-            web
+            web,
+            chinese
         };
 
         // Add heart button to main card
@@ -203,7 +252,7 @@ class ColorComponent {
         
         colorHistory.reverse().forEach((item, index) => {
             const historyCard = document.createElement('div');
-            historyCard.className = `history-card${item.holographic ? ' holographic' : ''}${item.gem ? ' gem' : ''}${item.web ? ' web' : ''}`;
+            historyCard.className = `history-card${item.holographic ? ' holographic' : ''}${item.gem ? ' gem' : ''}${item.web ? ' web' : ''}${item.chinese ? ' chinese' : ''}`;
             if (item.gradient) {
                 historyCard.style.background = `linear-gradient(45deg, ${item.color}, ${item.secondColor})`;
             } else {
@@ -214,6 +263,8 @@ class ColorComponent {
                 this.gemPattern.addDelaunayPattern(historyCard);
             } else if (item.web) {
                 this.webPattern.addPattern(historyCard);
+            } else if (item.chinese) {
+                this.addChineseCharacter(historyCard, item.color);
             }
 
             const historyInfo = document.createElement('div');
@@ -271,8 +322,11 @@ class ColorComponent {
         const gradientWebCard = this.createPreviewCard('#ff9933', false, true, false, true, 'Gradient Web Card', '#9933ff');
         const holoWebCard = this.createPreviewCard('#42f587', true, false, false, true, 'Holographic Web Card');
         const holoGradientWebCard = this.createPreviewCard('#8742f5', true, true, false, true, 'Holographic Gradient Web Card', '#f54287');
+        const chineseCard = this.createPreviewCard('#e85d75', false, false, false, false, 'Chinese Character Card');
+        this.addChineseCharacter(chineseCard, '#e85d75');
 
-        [normalCard, holoCard, gradientCard, gemCard, webCard, gradientWebCard, holoWebCard, holoGradientWebCard].forEach(card => {
+        [normalCard, holoCard, gradientCard, gemCard, webCard, gradientWebCard, 
+         holoWebCard, holoGradientWebCard, chineseCard].forEach(card => {
             previewContainer.appendChild(card);
             card.addEventListener('mousemove', (e) => this.handleMouseMove(e, card));
             card.addEventListener('mouseleave', (e) => this.handleMouseLeave(e, card));
@@ -321,9 +375,10 @@ class ColorComponent {
         testContainer.className = 'test-container';
 
         for (let i = 0; i < 50; i++) {
-            const { color, secondColor, holographic, gradient, gem, web } = this.generateRandomColor();
+            const { color, secondColor, holographic, gradient, gem, web, chinese } = this.generateRandomColor();
             const testCard = document.createElement('div');
-            testCard.className = `history-card${holographic ? ' holographic' : ''}`; // Use the same class as history cards
+            testCard.className = `history-card${holographic ? ' holographic' : ''}${gem ? ' gem' : ''}${web ? ' web' : ''}${chinese ? ' chinese' : ''}`;
+            
             if (gradient) {
                 testCard.style.background = `linear-gradient(45deg, ${color}, ${secondColor})`;
             } else {
@@ -336,20 +391,21 @@ class ColorComponent {
             } else if (web) {
                 testCard.classList.add('web');
                 this.webPattern.addPattern(testCard);
+            } else if (chinese) {
+                this.addChineseCharacter(testCard, color);
             }
 
             const testInfo = document.createElement('div');
-            testInfo.className = 'history-info'; // Use the same class as history info
+            testInfo.className = 'history-info';
             testInfo.style.color = this.calculateContrastColor(color);
             testInfo.style.fontWeight = 'bold';
             testInfo.innerHTML = gradient ? 
-                `HEX: ${color.toUpperCase()} → ${secondColor.toUpperCase()}<br>RGB_1(${this.hexToRgb(color)})<br>RGB_2(${this.hexToRgb(secondColor)})<br>GEM: ${gem}<br>WEB: ${web}` :
-                `HEX: ${color.toUpperCase()}<br>RGB(${this.hexToRgb(color)})<br>GEM: ${gem}<br>WEB: ${web}`;
+                `HEX: ${color.toUpperCase()} → ${secondColor.toUpperCase()}<br>RGB_1(${this.hexToRgb(color)})<br>RGB_2(${this.hexToRgb(secondColor)})` :
+                `HEX: ${color.toUpperCase()}<br>RGB(${this.hexToRgb(color)})`;
 
             testCard.appendChild(testInfo);
             testContainer.appendChild(testCard);
 
-            // Add mouse move handlers to test cards
             testCard.addEventListener('mousemove', (e) => this.handleMouseMove(e, testCard));
             testCard.addEventListener('mouseleave', (e) => this.handleMouseLeave(e, testCard));
         }

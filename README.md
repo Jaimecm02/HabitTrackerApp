@@ -93,10 +93,12 @@ The Color Component features a 3D card effect that enhances the visual appeal of
 - **Holographic (3.5%):** A card with a holographic effect
 - **Gradient (6.5%):** A card with a gradient transition
 - **Gem (1%):** A card with a gem pattern using Delaunay triangulation
+- **Web (1%):** A card with a web pattern using Voronoi cells
+- **Chinese Character (1%):** A card with a Chinese character and its translation
 
-It also provides a preview section to showcase different types of color cards, including normal, holographic, gradient, and gem cards.
+It also provides a preview section to showcase different types of color cards, including normal, holographic, gradient, gem, web, and Chinese character cards.
 
-![Card types](assets/cardtypes.png)
+![Card types](assets/card_types/cardtypes.png)
 
 ## 📄 License
 

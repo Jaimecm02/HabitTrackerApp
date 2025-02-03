@@ -186,7 +186,7 @@ class WebPattern {
             
             // Increased opacity values
             const baseOpacity = Math.max(0.2, Math.min(0.5, 0.2 + proximity * 0.3));
-            gradient.addColorStop(0, `rgba(255, 255, 255, ${baseOpacity * 2.5})`);
+            gradient.addColorStop(0, `rgba(255, 255, 255, ${baseOpacity * 1.1})`);
             gradient.addColorStop(1, `rgba(255, 255, 255, ${baseOpacity})`);
 
             ctx.fillStyle = gradient;
