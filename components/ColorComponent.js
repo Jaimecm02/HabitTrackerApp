@@ -1,11 +1,13 @@
 const GemPattern = require('./GemPattern');
 const WebPattern = require('./WebPattern');
+const ChinesePattern = require('./ChinesePattern');
 
 class ColorComponent {
     constructor() {
         this.container = document.getElementById('colorComponent');
         this.gemPattern = new GemPattern();
         this.webPattern = new WebPattern();
+        this.chinesePattern = new ChinesePattern();
         this.likedColors = JSON.parse(localStorage.getItem('likedColors') || '[]');
         this.setupComponent();
     }
@@ -61,48 +63,6 @@ class ColorComponent {
         const chinese = patternRoll >= 0.02 && patternRoll < 0.03; // 1% chance for Chinese character
 
         return { color, secondColor, holographic, gradient, gem, web, chinese };
-    }
-
-    getRandomChineseCharacter() {
-        // Chinese characters with their English translations
-        const characters = {
-            '福': 'Fortune',
-            '禄': 'Wealth',
-            '寿': 'Longevity',
-            '喜': 'Joy',
-            '爱': 'Love',
-            '德': 'Virtue',
-            '智': 'Wisdom',
-            '信': 'Trust',
-            '仁': 'Kindness',
-            '勇': 'Courage',
-            '和': 'Peace',
-            '平': 'Balance',
-            '安': 'Safety',
-            '康': 'Health',
-            '宁': 'Tranquility'
-        };
-        const chars = Object.keys(characters);
-        const char = chars[Math.floor(Math.random() * chars.length)];
-        return { character: char, translation: characters[char] };
-    }
-
-    addChineseCharacter(container, color) {
-        const { character, translation } = this.getRandomChineseCharacter();
-        const textColor = this.calculateContrastColor(color);
-
-        const charElement = document.createElement('div');
-        charElement.className = 'chinese-character';
-        charElement.style.color = textColor;
-        charElement.textContent = character;
-
-        const translationElement = document.createElement('div');
-        translationElement.className = 'chinese-translation';
-        translationElement.style.color = textColor;
-        translationElement.textContent = translation;
-
-        container.appendChild(charElement);
-        container.appendChild(translationElement);
     }
 
     hexToRgb(hex) {
@@ -174,7 +134,7 @@ class ColorComponent {
         } else if (web) {
             this.webPattern.addPattern(card);
         } else if (chinese) {
-            this.addChineseCharacter(card, color);
+            this.chinesePattern.addChineseCharacter(card, color);
         }
 
         const colorInfo = document.createElement('div');
@@ -264,7 +224,7 @@ class ColorComponent {
             } else if (item.web) {
                 this.webPattern.addPattern(historyCard);
             } else if (item.chinese) {
-                this.addChineseCharacter(historyCard, item.color);
+                this.chinesePattern.addChineseCharacter(historyCard, item.color);
             }
 
             const historyInfo = document.createElement('div');
@@ -323,7 +283,7 @@ class ColorComponent {
         const holoWebCard = this.createPreviewCard('#42f587', true, false, false, true, 'Holographic Web Card');
         const holoGradientWebCard = this.createPreviewCard('#8742f5', true, true, false, true, 'Holographic Gradient Web Card', '#f54287');
         const chineseCard = this.createPreviewCard('#e85d75', false, false, false, false, 'Chinese Character Card');
-        this.addChineseCharacter(chineseCard, '#e85d75');
+        this.chinesePattern.addChineseCharacter(chineseCard, '#e85d75');
 
         [normalCard, holoCard, gradientCard, gemCard, webCard, gradientWebCard, 
          holoWebCard, holoGradientWebCard, chineseCard].forEach(card => {
@@ -392,7 +352,7 @@ class ColorComponent {
                 testCard.classList.add('web');
                 this.webPattern.addPattern(testCard);
             } else if (chinese) {
-                this.addChineseCharacter(testCard, color);
+                this.chinesePattern.addChineseCharacter(testCard, color);
             }
 
             const testInfo = document.createElement('div');
