@@ -1,6 +1,7 @@
 const GemPattern = require('./GemPattern');
 const WebPattern = require('./WebPattern');
 const ChinesePattern = require('./ChinesePattern');
+const LavaPattern = require('./LavaPattern');
 const fs = require('fs');
 const path = require('path');
 
@@ -10,6 +11,7 @@ class ColorComponent {
         this.gemPattern = new GemPattern();
         this.webPattern = new WebPattern();
         this.chinesePattern = new ChinesePattern();
+        this.lavaPattern = new LavaPattern();
         this.dbName = 'ColorHistoryDB';
         this.storeName = 'colorHistory';
         this.db = null; 
@@ -113,7 +115,7 @@ class ColorComponent {
                 }
 
                 // Only generate new color if there's no existing entry
-                const { color, secondColor, holographic, gradient, gem, web, chinese } = this.generateRandomColor();
+                const { color, secondColor, holographic, gradient, gem, web, chinese, lava } = this.generateRandomColor();
                 let chineseChar = null;
                 let chineseTranslation = null;
                 
@@ -132,6 +134,7 @@ class ColorComponent {
                     gem,
                     web,
                     chinese,
+                    lava,
                     chineseChar,
                     chineseTranslation,
                     rgb: this.hexToRgb(color),
@@ -166,8 +169,9 @@ class ColorComponent {
         const gem = patternRoll < 0.01; // 1% chance for gem pattern
         const web = patternRoll >= 0.01 && patternRoll < 0.02; // 1% chance for web pattern
         const chinese = patternRoll >= 0.02 && patternRoll < 0.03; // 1% chance for Chinese character
+        const lava = patternRoll >= 0.03 && patternRoll < 0.04; // 1% chance for lava pattern
 
-        return { color, secondColor, holographic, gradient, gem, web, chinese };
+        return { color, secondColor, holographic, gradient, gem, web, chinese, lava };
     }
 
     hexToRgb(hex) {
@@ -234,13 +238,13 @@ class ColorComponent {
             return;
         }
         this.container.innerHTML = '';
-        this.generateDailyColor().then(({ color, secondColor, holographic, gradient, gem, web, chinese, chineseChar, chineseTranslation }) => {
+        this.generateDailyColor().then(({ color, secondColor, holographic, gradient, gem, web, chinese, lava, chineseChar, chineseTranslation }) => {
             const rgbColor = this.hexToRgb(color);
             const textColor = this.calculateContrastColor(color);
             const today = new Date().toDateString();
 
             // Save today's color to history with all properties
-            this.saveColorToHistory({ color, secondColor, date: today, holographic, gradient, gem, web, chinese, chineseChar, chineseTranslation });
+            this.saveColorToHistory({ color, secondColor, date: today, holographic, gradient, gem, web, chinese, lava, chineseChar, chineseTranslation });
 
             // Get updated color history
             this.getColorHistory().then(colorHistory => {
@@ -248,7 +252,8 @@ class ColorComponent {
 
                 // Create main color card
                 const card = document.createElement('div');
-                card.className = `color-card${holographic ? ' holographic' : ''}${gem ? ' gem' : ''}${web ? ' web' : ''}${chinese ? ' chinese' : ''}`;
+                card.id = 'color-card-' + Date.now();
+                card.className = `color-card${holographic ? ' holographic' : ''}${gem ? ' gem' : ''}${web ? ' web' : ''}${chinese ? ' chinese' : ''}${lava ? ' lava' : ''}`;
                 if (gradient) {
                     card.style.background = `linear-gradient(45deg, ${color}, ${secondColor})`;
                 } else {
@@ -261,6 +266,8 @@ class ColorComponent {
                     this.webPattern.addPattern(card);
                 } else if (chinese) {
                     this.chinesePattern.addChineseCharacter(card, color, chineseChar, chineseTranslation);
+                } else if (lava) {
+                    this.lavaPattern.addPattern(card);
                 }
 
                 const colorInfo = document.createElement('div');
@@ -305,6 +312,7 @@ class ColorComponent {
                     gem,
                     web,
                     chinese,
+                    lava,
                     chineseChar,
                     chineseTranslation,
                     liked: this.isColorLiked(color),
@@ -346,7 +354,7 @@ class ColorComponent {
 
         colorHistory.forEach((item, index) => {
             const historyCard = document.createElement('div');
-            historyCard.className = `history-card${item.holographic ? ' holographic' : ''}${item.gem ? ' gem' : ''}${item.web ? ' web' : ''}${item.chinese ? ' chinese' : ''}`;
+            historyCard.className = `history-card${item.holographic ? ' holographic' : ''}${item.gem ? ' gem' : ''}${item.web ? ' web' : ''}${item.chinese ? ' chinese' : ''}${item.lava ? ' lava' : ''}`;
             if (item.gradient) {
                 historyCard.style.background = `linear-gradient(45deg, ${item.color}, ${item.secondColor})`;
             } else {
@@ -359,6 +367,8 @@ class ColorComponent {
                 this.webPattern.addPattern(historyCard);
             } else if (item.chinese) {
                 this.chinesePattern.addChineseCharacter(historyCard, item.color, item.chineseChar, item.chineseTranslation);
+            } else if (item.lava) {
+                this.lavaPattern.addPattern(historyCard);
             }
 
             const historyInfo = document.createElement('div');
