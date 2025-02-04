@@ -1,5 +1,5 @@
 const { app, BrowserWindow, Menu, shell } = require('electron');
-const { HABITS_FILE } = require('./components/habitsHandlers');
+const { HABITS_FILE } = require('./components/habits/habitsHandlers');
 
 const createWindow = () => {
     const win = new BrowserWindow({

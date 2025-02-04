@@ -1,7 +1,7 @@
 const { ipcRenderer } = require('electron');
-const HabitTracker = require('./components/habitTracker');
-const Analytics = require('./components/analytics');
-const ColorComponent = require('./components/ColorComponent');
+const HabitTracker = require('./components/habits/habitTracker');
+const Analytics = require('./components/analytics/analytics');
+const ColorComponent = require('./components/color/ColorComponent');
 const WelcomePage = require('./components/welcomePage');
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -39,8 +39,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Show default view
-    document.getElementById('welcomeComponent').style.display = 'block';
+    document.getElementById('welcomeComponent').style.display = 'none';
     document.getElementById('habitComponent').style.display = 'none';
     document.getElementById('analyticsComponent').style.display = 'none';
-    document.getElementById('colorComponent').style.display = 'none';
+    document.getElementById('colorComponent').style.display = 'block';
 });
