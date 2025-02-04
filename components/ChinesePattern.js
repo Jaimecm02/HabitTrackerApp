@@ -22,8 +22,18 @@ class ChinesePattern {
         return { character: char, translation: characters[char] };
     }
 
-    addChineseCharacter(container, color) {
-        const { character, translation } = this.getRandomChineseCharacter();
+    addChineseCharacter(container, color, storedChar = null, storedTranslation = null) {
+        let character, translation;
+        
+        if (storedChar && storedTranslation) {
+            character = storedChar;
+            translation = storedTranslation;
+        } else {
+            const result = this.getRandomChineseCharacter();
+            character = result.character;
+            translation = result.translation;
+        }
+
         const textColor = this.calculateContrastColor(color);
 
         const charElement = document.createElement('div');
@@ -38,6 +48,8 @@ class ChinesePattern {
 
         container.appendChild(charElement);
         container.appendChild(translationElement);
+        
+        return { character, translation };
     }
 
     calculateContrastColor(hexcolor) {

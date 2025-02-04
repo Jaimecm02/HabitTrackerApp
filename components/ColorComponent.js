@@ -1,6 +1,8 @@
 const GemPattern = require('./GemPattern');
 const WebPattern = require('./WebPattern');
 const ChinesePattern = require('./ChinesePattern');
+const fs = require('fs');
+const path = require('path');
 
 class ColorComponent {
     constructor() {
@@ -8,41 +10,144 @@ class ColorComponent {
         this.gemPattern = new GemPattern();
         this.webPattern = new WebPattern();
         this.chinesePattern = new ChinesePattern();
-        this.likedColors = JSON.parse(localStorage.getItem('likedColors') || '[]');
-        this.setupComponent();
+        this.dbName = 'ColorHistoryDB';
+        this.storeName = 'colorHistory';
+        this.db = null; 
+        this.jsonFilePath = path.join(__dirname, 'colorHistory.json');
+        this.initDB();
+    }
+
+    initDB() {
+        const request = indexedDB.open(this.dbName, 1);
+
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains(this.storeName)) {
+                const store = db.createObjectStore(this.storeName, { keyPath: 'cardNumber', autoIncrement: true });
+            } else {
+                const store = event.target.transaction.objectStore(this.storeName);
+                if (!store.indexNames.contains('cardNumber')) {
+                    store.createIndex('cardNumber', 'cardNumber', { unique: true });
+                }
+            }
+        };
+
+        request.onsuccess = (event) => {
+            this.db = event.target.result;
+            this.loadFromJSON(); // Load initial data from JSON
+            this.updateCardNumbers(); // Update card numbers if necessary
+            this.setupComponent();
+        };
+
+        request.onerror = (event) => {
+            console.error('IndexedDB error:', event.target.errorCode);
+        };
+    }
+
+    saveToJSON() {
+        this.getColorHistory().then(colorHistory => {
+            const jsonData = JSON.stringify(colorHistory, null, 2);
+            fs.writeFile(this.jsonFilePath, jsonData, (err) => {
+                if (err) console.error('Error saving to JSON:', err);
+                else console.log('Data synced to JSON file');
+            });
+        });
+    }
+
+    loadFromJSON() {
+        try {
+            if (fs.existsSync(this.jsonFilePath)) {
+                const jsonData = fs.readFileSync(this.jsonFilePath, 'utf8');
+                const colorHistory = JSON.parse(jsonData);
+                
+                const transaction = this.db.transaction([this.storeName], 'readwrite');
+                const store = transaction.objectStore(this.storeName);
+                
+                // Clear existing data
+                store.clear();
+                
+                // Import JSON data
+                colorHistory.forEach(entry => {
+                    store.put(entry);
+                });
+            }
+        } catch (err) {
+            console.error('Error loading from JSON:', err);
+        }
+    }
+
+    updateCardNumbers() {
+        const transaction = this.db.transaction([this.storeName], 'readwrite');
+        const store = transaction.objectStore(this.storeName);
+        const request = store.getAll();
+
+        request.onsuccess = (event) => {
+            const allData = event.target.result;
+            allData.sort((a, b) => new Date(a.date) - new Date(b.date)); // Sort by date
+            allData.forEach((data, index) => {
+                data.cardNumber = index + 1;
+                store.put(data);
+            });
+            this.saveToJSON(); // Sync to JSON after updating
+        };
+
+        request.onerror = (event) => {
+            console.error('Error updating card numbers:', event.target.error.message);
+        };
     }
 
     generateDailyColor() {
         const today = new Date().toDateString();
-        const stored = localStorage.getItem('dailyColor');
-        const storedData = stored ? JSON.parse(stored) : null;
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction([this.storeName], 'readonly');
+            const store = transaction.objectStore(this.storeName);
+            const request = store.getAll();
 
-        if (storedData && storedData.date === today) {
-            return {
-                color: storedData.color,
-                secondColor: storedData.secondColor,
-                holographic: storedData.holographic,
-                gradient: storedData.gradient,
-                gem: storedData.gem,
-                web: storedData.web,
-                chinese: storedData.chinese
+            request.onsuccess = (event) => {
+                const allEntries = event.target.result;
+                const existingEntry = allEntries.find(entry => entry.date === today);
+                
+                if (existingEntry) {
+                    resolve(existingEntry);
+                    return;
+                }
+
+                // Only generate new color if there's no existing entry
+                const { color, secondColor, holographic, gradient, gem, web, chinese } = this.generateRandomColor();
+                let chineseChar = null;
+                let chineseTranslation = null;
+                
+                if (chinese) {
+                    const result = this.chinesePattern.getRandomChineseCharacter();
+                    chineseChar = result.character;
+                    chineseTranslation = result.translation;
+                }
+
+                const data = {
+                    date: today,
+                    color,
+                    secondColor,
+                    holographic,
+                    gradient,
+                    gem,
+                    web,
+                    chinese,
+                    chineseChar,
+                    chineseTranslation,
+                    rgb: this.hexToRgb(color),
+                    rgb2: gradient ? this.hexToRgb(secondColor) : null,
+                    cardNumber: 0, // Will be updated when saved
+                    liked: false
+                };
+                
+                this.saveColorToHistory(data, true);
+                resolve(data);
             };
-        }
 
-        const { color, secondColor, holographic, gradient, gem, web, chinese } = this.generateRandomColor();
-
-        localStorage.setItem('dailyColor', JSON.stringify({
-            date: today,
-            color: color,
-            secondColor: secondColor,
-            holographic: holographic,
-            gradient: gradient,
-            gem: gem,
-            web: web,
-            chinese: chinese
-        }));
-
-        return { color, secondColor, holographic, gradient, gem, web, chinese };
+            request.onerror = (event) => {
+                reject(event.target.error);
+            };
+        });
     }
 
     generateRandomColor() {
@@ -78,139 +183,168 @@ class ColorComponent {
         return brightness > 128 ? '#000000' : '#FFFFFF';
     }
 
-    saveColorToHistory(color, date, holographic, gradient, secondColor, gem, web, chinese) {
-        const history = localStorage.getItem('colorHistory') || '[]';
-        const historyArray = JSON.parse(history);
-        
-        if (!historyArray.some(item => item.date === date)) {
-            const rgb = this.hexToRgb(color);
-            const rgb2 = gradient ? this.hexToRgb(secondColor) : null;
-            historyArray.push({ 
-                date, 
-                color, 
-                secondColor,
-                rgb, 
-                rgb2,
-                holographic, 
-                gradient,
-                gem,
-                web,
-                chinese
-            });
-            localStorage.setItem('colorHistory', JSON.stringify(historyArray));
+    saveColorToHistory(data, skipLocalStorage = false) {
+        if (!this.db) {
+            console.error('Database is not initialized.');
+            return;
         }
+
+        const transaction = this.db.transaction([this.storeName], 'readwrite');
+        const store = transaction.objectStore(this.storeName);
+        const request = store.getAll();
+
+        request.onsuccess = (event) => {
+            const allEntries = event.target.result;
+            const existingEntry = allEntries.find(entry => entry.date === data.date);
+            
+            if (existingEntry) {
+                // If entry exists, don't save again
+                return;
+            }
+
+            const cardNumber = allEntries.length + 1;
+            data.cardNumber = cardNumber;
+
+            store.put(data).onsuccess = () => {
+                console.log('Color history saved successfully.');
+                this.saveToJSON();
+            };
+        };
     }
 
     getColorHistory() {
-        const history = localStorage.getItem('colorHistory') || '[]';
-        return JSON.parse(history);
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction([this.storeName], 'readonly');
+            const store = transaction.objectStore(this.storeName);
+            const request = store.getAll();
+
+            request.onsuccess = (event) => {
+                resolve(event.target.result);
+            };
+
+            request.onerror = (event) => {
+                reject(event.target.error);
+            };
+        });
     }
 
     setupComponent() {
+        if (!this.db) {
+            console.error('Database is not initialized.');
+            return;
+        }
         this.container.innerHTML = '';
-        const { color, secondColor, holographic, gradient, gem, web, chinese } = this.generateDailyColor();
-        const rgbColor = this.hexToRgb(color);
-        const textColor = this.calculateContrastColor(color);
-        const today = new Date().toDateString();
+        this.generateDailyColor().then(({ color, secondColor, holographic, gradient, gem, web, chinese, chineseChar, chineseTranslation }) => {
+            const rgbColor = this.hexToRgb(color);
+            const textColor = this.calculateContrastColor(color);
+            const today = new Date().toDateString();
 
-        // Save today's color to history with all properties
-        this.saveColorToHistory(color, today, holographic, gradient, secondColor, gem, web, chinese);
+            // Save today's color to history with all properties
+            this.saveColorToHistory({ color, secondColor, date: today, holographic, gradient, gem, web, chinese, chineseChar, chineseTranslation });
 
-        // Get updated color history
-        const colorHistory = this.getColorHistory();
-        const cardIndex = colorHistory.length;
+            // Get updated color history
+            this.getColorHistory().then(colorHistory => {
+                const cardIndex = colorHistory.findIndex(item => item.date === today) + 1;
 
-        // Create main color card
-        const card = document.createElement('div');
-        card.className = `color-card${holographic ? ' holographic' : ''}${gem ? ' gem' : ''}${web ? ' web' : ''}${chinese ? ' chinese' : ''}`;
-        if (gradient) {
-            card.style.background = `linear-gradient(45deg, ${color}, ${secondColor})`;
-        } else {
-            card.style.backgroundColor = color;
-        }
+                // Create main color card
+                const card = document.createElement('div');
+                card.className = `color-card${holographic ? ' holographic' : ''}${gem ? ' gem' : ''}${web ? ' web' : ''}${chinese ? ' chinese' : ''}`;
+                if (gradient) {
+                    card.style.background = `linear-gradient(45deg, ${color}, ${secondColor})`;
+                } else {
+                    card.style.backgroundColor = color;
+                }
 
-        if (gem) {
-            this.gemPattern.addDelaunayPattern(card);
-        } else if (web) {
-            this.webPattern.addPattern(card);
-        } else if (chinese) {
-            this.chinesePattern.addChineseCharacter(card, color);
-        }
+                if (gem) {
+                    this.gemPattern.addDelaunayPattern(card);
+                } else if (web) {
+                    this.webPattern.addPattern(card);
+                } else if (chinese) {
+                    this.chinesePattern.addChineseCharacter(card, color, chineseChar, chineseTranslation);
+                }
 
-        const colorInfo = document.createElement('div');
-        colorInfo.className = 'color-info';
-        colorInfo.style.color = textColor;
-        
-        const hexCode = document.createElement('div');
-        hexCode.className = 'color-code';
-        hexCode.style.fontWeight = 'bold';
-        hexCode.textContent = gradient ? 
-            `HEX: ${color.toUpperCase()} → ${secondColor.toUpperCase()}` :
-            `HEX: ${color.toUpperCase()}`;
+                const colorInfo = document.createElement('div');
+                colorInfo.className = 'color-info';
+                colorInfo.style.color = textColor;
+                
+                const hexCode = document.createElement('div');
+                hexCode.className = 'color-code';
+                hexCode.style.fontWeight = 'bold';
+                hexCode.textContent = gradient ? 
+                    `HEX: ${color.toUpperCase()} → ${secondColor.toUpperCase()}` :
+                    `HEX: ${color.toUpperCase()}`;
 
-        const rgbCode = document.createElement('div');
-        rgbCode.className = 'color-code';
-        rgbCode.style.fontWeight = 'bold';
-        rgbCode.innerHTML = gradient ?
-            `RGB_1(${rgbColor})<br>RGB_2(${this.hexToRgb(secondColor)})<br>` :
-            `RGB(${rgbColor})`;
+                const rgbCode = document.createElement('div');
+                rgbCode.className = 'color-code';
+                rgbCode.style.fontWeight = 'bold';
+                rgbCode.innerHTML = gradient ?
+                    `RGB_1(${rgbColor})<br>RGB_2(${this.hexToRgb(secondColor)})<br>` :
+                    `RGB(${rgbColor})`;
 
-        const cardNumber = document.createElement('div');
-        cardNumber.className = 'card-number';
-        cardNumber.style.fontWeight = 'bold'; 
-        cardNumber.textContent = cardIndex;
-        cardNumber.style.position = 'absolute';
-        cardNumber.style.top = '10px';
-        cardNumber.style.right = '10px';
-        cardNumber.style.color = textColor;
+                const cardNumber = document.createElement('div');
+                cardNumber.className = 'card-number';
+                cardNumber.style.fontWeight = 'bold'; 
+                cardNumber.textContent = cardIndex;
+                cardNumber.style.position = 'absolute';
+                cardNumber.style.top = '10px';
+                cardNumber.style.right = '10px';
+                cardNumber.style.color = textColor;
 
-        colorInfo.appendChild(hexCode);
-        colorInfo.appendChild(rgbCode);
-        card.appendChild(colorInfo);
-        card.appendChild(cardNumber);
-        this.container.appendChild(card);
+                colorInfo.appendChild(hexCode);
+                colorInfo.appendChild(rgbCode);
+                card.appendChild(colorInfo);
+                card.appendChild(cardNumber);
+                this.container.appendChild(card);
 
-        const cardData = {
-            color,
-            secondColor,
-            date: today,
-            holographic,
-            gradient,
-            gem,
-            web,
-            chinese
-        };
+                const cardData = {
+                    color,
+                    secondColor,
+                    date: today,
+                    holographic,
+                    gradient,
+                    gem,
+                    web,
+                    chinese,
+                    chineseChar,
+                    chineseTranslation,
+                    liked: this.isColorLiked(color),
+                    cardNumber: cardIndex
+                };
 
-        // Add heart button to main card
-        const heartButton = this.createHeartButton(color, cardData);
-        card.appendChild(heartButton);
+                // Add heart button to main card
+                const heartButton = this.createHeartButton(color, cardData);
+                card.appendChild(heartButton);
 
-        // Add mouse move handlers to main card
-        card.addEventListener('mousemove', (e) => this.handleMouseMove(e, card));
-        card.addEventListener('mouseleave', (e) => this.handleMouseLeave(e, card));
+                // Add mouse move handlers to main card
+                card.addEventListener('mousemove', (e) => this.handleMouseMove(e, card));
+                card.addEventListener('mouseleave', (e) => this.handleMouseLeave(e, card));
 
-        // Add history section
-        this.addHistorySection(colorHistory);
-
-        // Add preview section after history section
-        this.addPreviewSection();
-
-        // Add test section
-        // this.addTestSection();
+                // Add history section
+                this.addHistorySection(colorHistory);
+            });
+        });
     }
 
     addHistorySection(colorHistory) {
+        if (!this.db) {
+            console.error('Database is not initialized.');
+            return;
+        }
+
         const historySection = document.createElement('div');
         historySection.className = 'history-section';
-        
+
         const historyTitle = document.createElement('h2');
         historyTitle.textContent = 'COLOR HISTORY';
         historyTitle.className = 'history-title';
-        
+
         const historyContainer = document.createElement('div');
         historyContainer.className = 'history-container';
-        
-        colorHistory.reverse().forEach((item, index) => {
+
+        // Sort by date in descending order (most recent first)
+        colorHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        colorHistory.forEach((item, index) => {
             const historyCard = document.createElement('div');
             historyCard.className = `history-card${item.holographic ? ' holographic' : ''}${item.gem ? ' gem' : ''}${item.web ? ' web' : ''}${item.chinese ? ' chinese' : ''}`;
             if (item.gradient) {
@@ -218,13 +352,13 @@ class ColorComponent {
             } else {
                 historyCard.style.backgroundColor = item.color;
             }
-            
+
             if (item.gem) {
                 this.gemPattern.addDelaunayPattern(historyCard);
             } else if (item.web) {
                 this.webPattern.addPattern(historyCard);
             } else if (item.chinese) {
-                this.chinesePattern.addChineseCharacter(historyCard, item.color);
+                this.chinesePattern.addChineseCharacter(historyCard, item.color, item.chineseChar, item.chineseTranslation);
             }
 
             const historyInfo = document.createElement('div');
@@ -238,12 +372,12 @@ class ColorComponent {
             const historyCardNumber = document.createElement('div');
             historyCardNumber.className = 'card-number';
             historyCardNumber.style.fontWeight = 'bold';
-            historyCardNumber.textContent = colorHistory.length - index;
+            historyCardNumber.textContent = item.cardNumber;
             historyCardNumber.style.position = 'absolute';
             historyCardNumber.style.top = '10px';
             historyCardNumber.style.right = '10px';
             historyCardNumber.style.color = this.calculateContrastColor(item.color);
-            
+
             historyCard.appendChild(historyInfo);
             historyCard.appendChild(historyCardNumber);
             historyContainer.appendChild(historyCard);
@@ -260,119 +394,6 @@ class ColorComponent {
         historySection.appendChild(historyTitle);
         historySection.appendChild(historyContainer);
         this.container.appendChild(historySection);
-    }
-
-    addPreviewSection() {
-        const previewSection = document.createElement('div');
-        previewSection.className = 'preview-section';
-        
-        const previewTitle = document.createElement('h2');
-        previewTitle.textContent = 'CARD TYPES';
-        previewTitle.className = 'preview-title';
-        
-        const previewContainer = document.createElement('div');
-        previewContainer.className = 'preview-container';
-
-        // Create example cards
-        const normalCard = this.createPreviewCard('#FF5733', false, false, false, false, 'Normal Card');
-        const holoCard = this.createPreviewCard('#4287f5', true, false, false, false, 'Holographic Card');
-        const gradientCard = this.createPreviewCard('#33ff57', false, true, false, false, 'Gradient Card', '#5733ff');
-        const gemCard = this.createPreviewCard('#f54287', false, false, true, false, 'Gem Card');
-        const webCard = this.createPreviewCard('#87f542', false, false, false, true, 'Web Card');
-        const gradientWebCard = this.createPreviewCard('#ff9933', false, true, false, true, 'Gradient Web Card', '#9933ff');
-        const holoWebCard = this.createPreviewCard('#42f587', true, false, false, true, 'Holographic Web Card');
-        const holoGradientWebCard = this.createPreviewCard('#8742f5', true, true, false, true, 'Holographic Gradient Web Card', '#f54287');
-        const chineseCard = this.createPreviewCard('#e85d75', false, false, false, false, 'Chinese Character Card');
-        this.chinesePattern.addChineseCharacter(chineseCard, '#e85d75');
-
-        [normalCard, holoCard, gradientCard, gemCard, webCard, gradientWebCard, 
-         holoWebCard, holoGradientWebCard, chineseCard].forEach(card => {
-            previewContainer.appendChild(card);
-            card.addEventListener('mousemove', (e) => this.handleMouseMove(e, card));
-            card.addEventListener('mouseleave', (e) => this.handleMouseLeave(e, card));
-        });
-
-        previewSection.appendChild(previewTitle);
-        previewSection.appendChild(previewContainer);
-        this.container.appendChild(previewSection);
-    }
-
-    createPreviewCard(color, holographic, gradient, gem, web, label, secondColor = '#ffffff') {
-        const card = document.createElement('div');
-        card.className = `preview-card${holographic ? ' holographic' : ''}${gem ? ' gem' : ''}${web ? ' web' : ''}`;
-        
-        if (gradient) {
-            card.style.background = `linear-gradient(45deg, ${color}, ${secondColor})`;
-        } else {
-            card.style.backgroundColor = color;
-        }
-
-        if (gem) {
-            this.gemPattern.addDelaunayPattern(card);
-        } else if (web) {
-            this.webPattern.addPattern(card);
-        }
-
-        const cardLabel = document.createElement('div');
-        cardLabel.className = 'preview-label';
-        cardLabel.style.color = this.calculateContrastColor(color);
-        cardLabel.textContent = label;
-        
-        card.appendChild(cardLabel);
-
-        return card;
-    }
-
-    addTestSection() {
-        const testSection = document.createElement('div');
-        testSection.className = 'test-section';
-
-        const testTitle = document.createElement('h2');
-        testTitle.textContent = 'TEST SECTION: 50 RANDOM GENERATIONS';
-        testTitle.className = 'test-title';
-
-        const testContainer = document.createElement('div');
-        testContainer.className = 'test-container';
-
-        for (let i = 0; i < 50; i++) {
-            const { color, secondColor, holographic, gradient, gem, web, chinese } = this.generateRandomColor();
-            const testCard = document.createElement('div');
-            testCard.className = `history-card${holographic ? ' holographic' : ''}${gem ? ' gem' : ''}${web ? ' web' : ''}${chinese ? ' chinese' : ''}`;
-            
-            if (gradient) {
-                testCard.style.background = `linear-gradient(45deg, ${color}, ${secondColor})`;
-            } else {
-                testCard.style.backgroundColor = color;
-            }
-
-            if (gem) {
-                testCard.classList.add('gem');
-                this.gemPattern.addDelaunayPattern(testCard);
-            } else if (web) {
-                testCard.classList.add('web');
-                this.webPattern.addPattern(testCard);
-            } else if (chinese) {
-                this.chinesePattern.addChineseCharacter(testCard, color);
-            }
-
-            const testInfo = document.createElement('div');
-            testInfo.className = 'history-info';
-            testInfo.style.color = this.calculateContrastColor(color);
-            testInfo.style.fontWeight = 'bold';
-            testInfo.innerHTML = gradient ? 
-                `HEX: ${color.toUpperCase()} → ${secondColor.toUpperCase()}<br>RGB_1(${this.hexToRgb(color)})<br>RGB_2(${this.hexToRgb(secondColor)})` :
-                `HEX: ${color.toUpperCase()}<br>RGB(${this.hexToRgb(color)})`;
-
-            testCard.appendChild(testInfo);
-            testContainer.appendChild(testCard);
-
-            testCard.addEventListener('mousemove', (e) => this.handleMouseMove(e, testCard));
-            testCard.addEventListener('mouseleave', (e) => this.handleMouseLeave(e, testCard));
-        }
-
-        testSection.appendChild(testTitle);
-        testSection.appendChild(testContainer);
-        this.container.appendChild(testSection);
     }
 
     handleMouseMove(e, card) {
@@ -403,7 +424,7 @@ class ColorComponent {
 
     createHeartButton(color, cardData) {
         const button = document.createElement('button');
-        button.className = `like-button${this.isColorLiked(color) ? ' liked' : ''}`;
+        button.className = 'like-button';
         button.innerHTML = `
             <svg viewBox="0 0 24 24">
                 <path class="heart-path" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
@@ -411,6 +432,13 @@ class ColorComponent {
         
         const textColor = this.calculateContrastColor(color);
         button.style.color = textColor;
+
+        // Check liked status from database
+        this.isColorLiked(cardData.cardNumber).then(isLiked => {
+            if (isLiked) {
+                button.classList.add('liked');
+            }
+        });
 
         button.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -423,30 +451,45 @@ class ColorComponent {
     toggleLikeColor(button, cardData) {
         const isLiked = button.classList.toggle('liked');
         
-        if (isLiked) {
-            this.likedColors.push(cardData);
-        } else {
-            const index = this.likedColors.findIndex(c => 
-                c.color === cardData.color && c.date === cardData.date
-            );
-            if (index !== -1) {
-                this.likedColors.splice(index, 1);
+        const transaction = this.db.transaction([this.storeName], 'readwrite');
+        const store = transaction.objectStore(this.storeName);
+        
+        // Find the record using cardNumber
+        const request = store.get(cardData.cardNumber);
+        
+        request.onsuccess = (event) => {
+            const record = event.target.result;
+            if (record) {
+                record.liked = isLiked;
+                store.put(record).onsuccess = () => {
+                    // Update UI for all instances of this color
+                    document.querySelectorAll('.history-card, .color-card').forEach(card => {
+                        const heartBtn = card.querySelector('.like-button');
+                        if (heartBtn && parseInt(card.querySelector('.card-number').textContent) === cardData.cardNumber) {
+                            heartBtn.className = `like-button${isLiked ? ' liked' : ''}`;
+                        }
+                    });
+                    this.saveToJSON(); // Sync to JSON after updating
+                };
             }
-        }
-
-        localStorage.setItem('likedColors', JSON.stringify(this.likedColors));
-
-        // Update all instances of this color in history
-        document.querySelectorAll('.history-card, .color-card').forEach(card => {
-            const heartBtn = card.querySelector('.like-button');
-            if (heartBtn && this.getCardColor(card) === cardData.color) {
-                heartBtn.className = `like-button${isLiked ? ' liked' : ''}`;
-            }
-        });
+        };
     }
 
-    isColorLiked(color) {
-        return this.likedColors.some(c => c.color === color);
+    isColorLiked(cardNumber) {
+        if (!this.db) return false;
+        
+        return new Promise((resolve) => {
+            const transaction = this.db.transaction([this.storeName], 'readonly');
+            const store = transaction.objectStore(this.storeName);
+            const request = store.get(cardNumber);
+            
+            request.onsuccess = (event) => {
+                const record = event.target.result;
+                resolve(record ? record.liked : false);
+            };
+            
+            request.onerror = () => resolve(false);
+        });
     }
 
     // Add new helper method to get card's color
@@ -457,6 +500,7 @@ class ColorComponent {
         }
         return background;
     }
+
 }
 
 module.exports = ColorComponent;
