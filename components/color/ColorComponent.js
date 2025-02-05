@@ -2,6 +2,7 @@ const GemPattern = require('./GemPattern');
 const WebPattern = require('./WebPattern');
 const ChinesePattern = require('./ChinesePattern');
 const LavaPattern = require('./LavaPattern');
+const ColorUtils = require('./ColorUtils');
 const fs = require('fs');
 const path = require('path');
 
@@ -137,8 +138,8 @@ class ColorComponent {
                     lava,
                     chineseChar,
                     chineseTranslation,
-                    rgb: this.hexToRgb(color),
-                    rgb2: gradient ? this.hexToRgb(secondColor) : null,
+                    rgb: ColorUtils.hexToRgbString(color),
+                    rgb2: gradient ? ColorUtils.hexToRgbString(secondColor) : null,
                     cardNumber: 0, // Will be updated when saved
                     liked: false
                 };
@@ -174,20 +175,7 @@ class ColorComponent {
         return { color, secondColor, holographic, gradient, gem, web, chinese, lava };
     }
 
-    hexToRgb(hex) {
-        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : null;
-    }
-
-    calculateContrastColor(hexcolor) {
-        const r = parseInt(hexcolor.slice(1, 3), 16);
-        const g = parseInt(hexcolor.slice(3, 5), 16);
-        const b = parseInt(hexcolor.slice(5, 7), 16);
-        const brightness = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-        return brightness > 128 ? '#000000' : '#FFFFFF';
-    }
-
-    saveColorToHistory(data, skipLocalStorage = false) {
+    saveColorToHistory(data) {
         if (!this.db) {
             console.error('Database is not initialized.');
             return;
@@ -239,8 +227,8 @@ class ColorComponent {
         }
         this.container.innerHTML = '';
         this.generateDailyColor().then(({ color, secondColor, holographic, gradient, gem, web, chinese, lava, chineseChar, chineseTranslation }) => {
-            const rgbColor = this.hexToRgb(color);
-            const textColor = this.calculateContrastColor(color);
+            const rgbColor = ColorUtils.hexToRgbString(color);
+            const textColor = ColorUtils.calculateContrastColor(color);
             const today = new Date().toDateString();
 
             // Save today's color to history with all properties
@@ -267,7 +255,7 @@ class ColorComponent {
                 } else if (chinese) {
                     this.chinesePattern.addChineseCharacter(card, color, chineseChar, chineseTranslation);
                 } else if (lava) {
-                    this.lavaPattern.addPattern(card, color);
+                    this.lavaPattern.addPattern(card, color, gradient ? secondColor : null);
                 }
 
                 const colorInfo = document.createElement('div');
@@ -285,7 +273,7 @@ class ColorComponent {
                 rgbCode.className = 'color-code';
                 rgbCode.style.fontWeight = 'bold';
                 rgbCode.innerHTML = gradient ?
-                    `RGB_1(${rgbColor})<br>RGB_2(${this.hexToRgb(secondColor)})<br>` :
+                    `RGB_1(${rgbColor})<br>RGB_2(${ColorUtils.hexToRgbString(secondColor)})<br>` :
                     `RGB(${rgbColor})`;
 
                 const cardNumber = document.createElement('div');
@@ -368,12 +356,12 @@ class ColorComponent {
             } else if (item.chinese) {
                 this.chinesePattern.addChineseCharacter(historyCard, item.color, item.chineseChar, item.chineseTranslation);
             } else if (item.lava) {
-                this.lavaPattern.addPattern(historyCard, item.color);
+                this.lavaPattern.addPattern(historyCard, item.color, item.gradient ? item.secondColor : null);
             }
 
             const historyInfo = document.createElement('div');
             historyInfo.className = 'history-info';
-            historyInfo.style.color = this.calculateContrastColor(item.color);
+            historyInfo.style.color = ColorUtils.calculateContrastColor(item.color);
             historyInfo.style.fontWeight = 'bold';
             historyInfo.innerHTML = item.gradient ? 
                 `${item.date}<br>HEX: ${item.color} → ${item.secondColor}<br>RGB_1(${item.rgb})<br>RGB_2(${item.rgb2})` :
@@ -386,7 +374,7 @@ class ColorComponent {
             historyCardNumber.style.position = 'absolute';
             historyCardNumber.style.top = '10px';
             historyCardNumber.style.right = '10px';
-            historyCardNumber.style.color = this.calculateContrastColor(item.color);
+            historyCardNumber.style.color = ColorUtils.calculateContrastColor(item.color);
 
             historyCard.appendChild(historyInfo);
             historyCard.appendChild(historyCardNumber);
@@ -440,7 +428,7 @@ class ColorComponent {
                 <path class="heart-path" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
             </svg>`;
         
-        const textColor = this.calculateContrastColor(color);
+        const textColor = ColorUtils.calculateContrastColor(color);
         button.style.color = textColor;
 
         // Check liked status from database
@@ -502,7 +490,6 @@ class ColorComponent {
         });
     }
 
-    // Add new helper method to get card's color
     getCardColor(card) {
         const background = card.style.background || card.style.backgroundColor;
         if (background.includes('linear-gradient')) {
