@@ -267,7 +267,7 @@ class ColorComponent {
                 } else if (chinese) {
                     this.chinesePattern.addChineseCharacter(card, color, chineseChar, chineseTranslation);
                 } else if (lava) {
-                    this.lavaPattern.addPattern(card);
+                    this.lavaPattern.addPattern(card, color);
                 }
 
                 const colorInfo = document.createElement('div');
@@ -368,7 +368,7 @@ class ColorComponent {
             } else if (item.chinese) {
                 this.chinesePattern.addChineseCharacter(historyCard, item.color, item.chineseChar, item.chineseTranslation);
             } else if (item.lava) {
-                this.lavaPattern.addPattern(historyCard);
+                this.lavaPattern.addPattern(historyCard, item.color);
             }
 
             const historyInfo = document.createElement('div');
