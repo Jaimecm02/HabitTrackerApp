@@ -1,8 +1,8 @@
 const { ipcRenderer } = require('electron');
-const HabitTracker = require('./components/habits/habitTracker');
-const Analytics = require('./components/analytics/analytics');
-const ColorComponent = require('./components/color/ColorComponent');
-const WelcomePage = require('./components/welcomePage');
+const HabitTracker = require('./src/components/Habits/habitTracker');
+const Analytics = require('./src/components/Analytics/analytics');
+const ColorComponent = require('./src/components/Colors/ColorComponent');
+const WelcomePage = require('./src/components/WelcomePage/welcomePage');
 
 document.addEventListener('DOMContentLoaded', () => {
     // Load the SVG icons
