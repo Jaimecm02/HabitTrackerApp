@@ -95,8 +95,9 @@ class GemPattern {
         ];
     }
 
-    generatePoints(width, height) {
-        return PointGeneration.generatePoints(width, height, { randomPointsFactor: 1/3 });
+    generatePoints(width, height, randomSeed) {
+        return PointGeneration.generatePoints(width, height, { 
+            randomSeed: randomSeed});
     }
 
     drawGemPattern(ctx, triangles, width, height) {
@@ -144,7 +145,7 @@ class GemPattern {
         });
     }
 
-    addDelaunayPattern(card) {
+    addDelaunayPattern(card, randomSeed) {
         const canvas = document.createElement('canvas');
         canvas.className = 'delaunay-pattern';
         
@@ -160,7 +161,7 @@ class GemPattern {
             const ctx = canvas.getContext('2d');
             ctx.scale(dpr, dpr);
             
-            const points = this.generatePoints(rect.width, rect.height);
+            const points = this.generatePoints(rect.width, rect.height, randomSeed);
             const triangles = this.delaunayTriangulation(points);
             
             this.drawGemPattern(ctx, triangles, rect.width, rect.height);

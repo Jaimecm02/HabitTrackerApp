@@ -95,8 +95,8 @@ class WebPattern {
         ];
     }
 
-    generatePoints(width, height) {
-        return PointGeneration.generatePoints(width, height, { randomPointsFactor: 1/3 });
+    generatePoints(width, height, randomSeed) {
+        return PointGeneration.generatePoints(width, height, { randomSeed: randomSeed });
     }
 
     calculateVoronoiCells(points, triangles) {
@@ -198,7 +198,7 @@ class WebPattern {
         });
     }
 
-    addPattern(card) {
+    addPattern(card, randomSeed) {
         const canvas = document.createElement('canvas');
         canvas.className = 'voronoi-pattern';
         
@@ -214,7 +214,7 @@ class WebPattern {
             const ctx = canvas.getContext('2d');
             ctx.scale(dpr, dpr);
             
-            const points = this.generatePoints(rect.width, rect.height);
+            const points = this.generatePoints(rect.width, rect.height, randomSeed);
             const triangles = this.delaunayTriangulation(points);
             const cells = this.calculateVoronoiCells(points, triangles);
             

@@ -1,3 +1,5 @@
+const ColorUtils = require('./ColorUtils');
+
 class ChinesePattern {
     getRandomChineseCharacter() {
         const characters = {
@@ -33,8 +35,8 @@ class ChinesePattern {
             character = result.character;
             translation = result.translation;
         }
-
-        const textColor = this.calculateContrastColor(color);
+        
+        const textColor = ColorUtils.calculateContrastColor(color);
 
         const charElement = document.createElement('div');
         charElement.className = 'chinese-character';

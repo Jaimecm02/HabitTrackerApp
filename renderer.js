@@ -31,10 +31,13 @@ document.addEventListener('DOMContentLoaded', () => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             const target = e.currentTarget.getAttribute('href').substring(1);
+
             document.querySelectorAll('#content > div').forEach(div => {
                 div.style.display = 'none';
             });
             document.getElementById(target).style.display = 'block';
+            document.querySelectorAll('#sidebar a').forEach(a => a.classList.remove('active'));
+            e.currentTarget.classList.add('active');
         });
     });
 
@@ -43,4 +46,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('habitComponent').style.display = 'none';
     document.getElementById('analyticsComponent').style.display = 'none';
     document.getElementById('colorComponent').style.display = 'block';
+
+    document.querySelector('#sidebar a[href="#welcomeComponent"]').classList.add('active');
 });

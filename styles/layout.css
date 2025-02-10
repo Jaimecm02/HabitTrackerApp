@@ -15,18 +15,16 @@ body {
 
 /* Sidebar styles */
 #sidebar {
-    width: 64px;
+    width: 50px;
     height: 100%;
     position: fixed;
     left: 0;
     top: 0;
     background-color: var(--sidebar-bg);
-    padding-top: 20px;
-    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
     display: flex;
     flex-direction: column;
     align-items: center;
-    border-right: 1px solid var(--sidebar-border); /* Updated to use new variable */
+    border-right: 1px solid var(--sidebar-border);
 }
 
 #sidebar ul {
@@ -65,10 +63,20 @@ body {
     color: var(--primary-color);
 }
 
+#sidebar ul li a.active .nav-icon {
+    border-bottom: 3px solid var(--primary-color);
+    color: var(--primary-color);
+    filter: drop-shadow(0 0 2px rgba(41, 223, 255, 0.2));
+}
+
+#sidebar ul li a.active:hover .nav-icon {
+    opacity: 0.9;
+}
+
 /* Content styles */
 #content {
-    margin-left: 64px;  /* Adjusted margin to match fixed sidebar width */
-    width: calc(100% - 64px);  /* Adjusted width to be fluid */
+    margin-left: 50px;  /* Adjusted margin to match fixed sidebar width */
+    width: calc(100% - 50px);  /* Adjusted width to be fluid */
 }
 
 /* Responsive adjustments */

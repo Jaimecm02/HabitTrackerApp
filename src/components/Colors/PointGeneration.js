@@ -4,21 +4,35 @@ class PointGeneration {
         return x - Math.floor(x);
     }
 
+    static deriveParameters(seed) {
+        // Use different offsets for each parameter to ensure independence
+        const pointCount = Math.floor(this.seededRandom(seed) * 81) + 20; // 20-100 points
+        
+        // Select distribution type
+        const distributionRand = this.seededRandom(seed + 2);
+        const distributions = ['goldenSpiral', 'clustered', 'uniform'];
+        const distribution = distributions[Math.floor(distributionRand * distributions.length)];
+
+        return {
+            pointCount,
+            distribution,
+        };
+    }
+
     static generatePoints(width, height, options = {}) {
         const {
-            pointCount = 20,
-            randomPointsFactor = 1/3,
-            distribution = 'goldenSpiral',
+            randomSeed = 72340,
             clusterCount = 3,
             clusterSpread = 0.4,
             centerX,
             centerY,
-            anchorPosition = 'bottomLeft',
             spacingFactor = 1.21,
-            minPointsPerCircle = 40,
-            randomSeed = 723401
+            minPointsPerCircle = 40
         } = options;
 
+        // Derive parameters from seed
+        const derivedParams = this.deriveParameters(randomSeed);
+        
         const points = [
             [0, 0],
             [0, height],
@@ -26,22 +40,22 @@ class PointGeneration {
             [width, height]
         ];
 
-        switch (distribution) {
+        switch (derivedParams.distribution) {
             case 'goldenSpiral':
-                points.push(...this.generateGoldenSpiral(width, height, pointCount, randomSeed));
+                points.push(...this.generateGoldenSpiral(width, height, derivedParams.pointCount, randomSeed));
                 break;
             case 'clustered':
-                points.push(...this.generateClusters(width, height, pointCount, clusterCount, clusterSpread, randomSeed));
+                points.push(...this.generateClusters(width, height, derivedParams.pointCount, clusterCount, clusterSpread, randomSeed));
                 break;
             case 'uniform':
-                points.push(...this.generateUniform(width, height, pointCount, randomSeed));
+                points.push(...this.generateUniform(width, height, derivedParams.pointCount, randomSeed));
                 break;
             case 'radialGradient':
                 let anchorX = centerX;
                 let anchorY = centerY;
                 
                 if (!centerX || !centerY) {
-                    switch (anchorPosition) {
+                    switch (derivedParams.anchorPosition) {
                         case 'topLeft':
                             anchorX = 0;
                             anchorY = 0;
@@ -65,23 +79,28 @@ class PointGeneration {
                 }
                 
                 points.push(...this.generateRadialGradient(
-                    width, height, pointCount,
+                    width, height, derivedParams.pointCount,
                     anchorX, anchorY,
                     spacingFactor, minPointsPerCircle,
                     randomSeed
                 ));
                 break;
             default:
-                throw new Error(`Unknown distribution type: ${distribution}`);
+                throw new Error(`Unknown distribution type: ${derivedParams.distribution}`);
         }
 
-        if (randomPointsFactor > 0) {
-            points.push(...this.generateRandom(width, height, Math.floor(pointCount * randomPointsFactor), randomSeed));
+        if (derivedParams.randomPointsFactor > 0) {
+            points.push(...this.generateRandom(
+                width, height, 
+                Math.floor(derivedParams.pointCount * derivedParams.randomPointsFactor), 
+                randomSeed
+            ));
         }
 
         return points;
     }
 
+    // Rest of the methods remain unchanged
     static generateGoldenSpiral(width, height, pointCount, seed) {
         const points = [];
         const goldenRatio = (1 + Math.sqrt(5)) / 2;

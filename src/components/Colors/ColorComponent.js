@@ -5,6 +5,7 @@ const LavaPattern = require('./LavaPattern');
 const ColorUtils = require('./ColorUtils');
 const fs = require('fs');
 const path = require('path');
+const { type } = require('os');
 
 class ColorComponent {
     constructor() {
@@ -116,7 +117,7 @@ class ColorComponent {
                 }
 
                 // Only generate new color if there's no existing entry
-                const { color, secondColor, holographic, gradient, gem, web, chinese, lava } = this.generateRandomColor();
+                const { color, secondColor, holographic, gradient, gem, web, chinese, lava, rotateCard } = this.generateRandomColor();
                 let chineseChar = null;
                 let chineseTranslation = null;
                 
@@ -140,8 +141,10 @@ class ColorComponent {
                     chineseTranslation,
                     rgb: ColorUtils.hexToRgbString(color),
                     rgb2: gradient ? ColorUtils.hexToRgbString(secondColor) : null,
-                    cardNumber: 0, // Will be updated when saved
-                    liked: false
+                    cardNumber: 0,
+                    liked: false,
+                    randomSeed: Math.random(),
+                    rotateCard
                 };
                 
                 this.saveColorToHistory(data, true);
@@ -165,14 +168,15 @@ class ColorComponent {
 
         const holographic = Math.random() < 0.035; // 3.5% chance of holographic color (one every 30 days)
         const gradient = Math.random() < 0.065; // 6.5% chance of gradient color (two every 30 days)
-        
+    
+        const rotateCard = Math.random() < 0.01; // 1% chance of rotated card
         const patternRoll = Math.random();
         const gem = patternRoll < 0.01; // 1% chance for gem pattern
         const web = patternRoll >= 0.01 && patternRoll < 0.02; // 1% chance for web pattern
         const chinese = patternRoll >= 0.02 && patternRoll < 0.03; // 1% chance for Chinese character
         const lava = patternRoll >= 0.03 && patternRoll < 0.04; // 1% chance for lava pattern
 
-        return { color, secondColor, holographic, gradient, gem, web, chinese, lava };
+        return { color, secondColor, holographic, gradient, gem, web, chinese, lava, rotateCard };
     }
 
     saveColorToHistory(data) {
@@ -226,13 +230,13 @@ class ColorComponent {
             return;
         }
         this.container.innerHTML = '';
-        this.generateDailyColor().then(({ color, secondColor, holographic, gradient, gem, web, chinese, lava, chineseChar, chineseTranslation }) => {
+        this.generateDailyColor().then(({ color, secondColor, holographic, gradient, gem, web, chinese, lava, chineseChar, chineseTranslation, rotateCard }) => {
             const rgbColor = ColorUtils.hexToRgbString(color);
             const textColor = ColorUtils.calculateContrastColor(color);
             const today = new Date().toDateString();
 
             // Save today's color to history with all properties
-            this.saveColorToHistory({ color, secondColor, date: today, holographic, gradient, gem, web, chinese, lava, chineseChar, chineseTranslation });
+            this.saveColorToHistory({ color, secondColor, date: today, holographic, gradient, gem, web, chinese, lava, chineseChar, chineseTranslation, rotateCard });
 
             // Get updated color history
             this.getColorHistory().then(colorHistory => {
@@ -350,9 +354,9 @@ class ColorComponent {
             }
 
             if (item.gem) {
-                this.gemPattern.addDelaunayPattern(historyCard);
+                this.gemPattern.addDelaunayPattern(historyCard, item.randomSeed);
             } else if (item.web) {
-                this.webPattern.addPattern(historyCard);
+                this.webPattern.addPattern(historyCard, item.randomSeed);
             } else if (item.chinese) {
                 this.chinesePattern.addChineseCharacter(historyCard, item.color, item.chineseChar, item.chineseTranslation);
             } else if (item.lava) {
@@ -387,6 +391,9 @@ class ColorComponent {
             // Add mouse move handlers to history cards
             historyCard.addEventListener('mousemove', (e) => this.handleMouseMove(e, historyCard));
             historyCard.addEventListener('mouseleave', (e) => this.handleMouseLeave(e, historyCard));
+            historyCard.addEventListener('click', () => {
+                console.log(`History card clicked`);
+            });
         });
 
         historySection.appendChild(historyTitle);
