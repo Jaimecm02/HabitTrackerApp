@@ -95,11 +95,6 @@ class GemPattern {
         ];
     }
 
-    generatePoints(width, height, randomSeed) {
-        return PointGeneration.generatePoints(width, height, { 
-            randomSeed: randomSeed});
-    }
-
     drawGemPattern(ctx, triangles, width, height) {
         ctx.clearRect(0, 0, width, height);
         
@@ -161,7 +156,7 @@ class GemPattern {
             const ctx = canvas.getContext('2d');
             ctx.scale(dpr, dpr);
             
-            const points = this.generatePoints(rect.width, rect.height, randomSeed);
+            const points = PointGeneration.generatePoints(rect.width, rect.height, { randomSeed: randomSeed });
             const triangles = this.delaunayTriangulation(points);
             
             this.drawGemPattern(ctx, triangles, rect.width, rect.height);

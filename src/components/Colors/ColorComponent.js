@@ -230,13 +230,13 @@ class ColorComponent {
             return;
         }
         this.container.innerHTML = '';
-        this.generateDailyColor().then(({ color, secondColor, holographic, gradient, gem, web, chinese, lava, chineseChar, chineseTranslation, rotateCard }) => {
+        this.generateDailyColor().then(({ color, secondColor, holographic, gradient, gem, web, chinese, lava, chineseChar, chineseTranslation, rotateCard, randomSeed }) => {
             const rgbColor = ColorUtils.hexToRgbString(color);
             const textColor = ColorUtils.calculateContrastColor(color);
             const today = new Date().toDateString();
 
             // Save today's color to history with all properties
-            this.saveColorToHistory({ color, secondColor, date: today, holographic, gradient, gem, web, chinese, lava, chineseChar, chineseTranslation, rotateCard });
+            this.saveColorToHistory({ color, secondColor, date: today, holographic, gradient, gem, web, chinese, lava, chineseChar, chineseTranslation, rotateCard, randomSeed });
 
             // Get updated color history
             this.getColorHistory().then(colorHistory => {
@@ -253,13 +253,13 @@ class ColorComponent {
                 }
 
                 if (gem) {
-                    this.gemPattern.addDelaunayPattern(card);
+                    this.gemPattern.addDelaunayPattern(card, randomSeed);
                 } else if (web) {
-                    this.webPattern.addPattern(card);
+                    this.webPattern.addPattern(card, randomSeed);
                 } else if (chinese) {
                     this.chinesePattern.addChineseCharacter(card, color, chineseChar, chineseTranslation);
                 } else if (lava) {
-                    this.lavaPattern.addPattern(card, color, gradient ? secondColor : null);
+                    this.lavaPattern.addPattern(card, color, gradient ? secondColor : null, randomSeed);
                 }
 
                 const colorInfo = document.createElement('div');
@@ -308,7 +308,8 @@ class ColorComponent {
                     chineseChar,
                     chineseTranslation,
                     liked: this.isColorLiked(color),
-                    cardNumber: cardIndex
+                    cardNumber: cardIndex,
+                    randomSeed
                 };
 
                 // Add heart button to main card
@@ -360,7 +361,7 @@ class ColorComponent {
             } else if (item.chinese) {
                 this.chinesePattern.addChineseCharacter(historyCard, item.color, item.chineseChar, item.chineseTranslation);
             } else if (item.lava) {
-                this.lavaPattern.addPattern(historyCard, item.color, item.gradient ? item.secondColor : null);
+                this.lavaPattern.addPattern(historyCard, item.color, item.gradient ? item.secondColor : null, item.randomSeed);
             }
 
             const historyInfo = document.createElement('div');
@@ -368,8 +369,8 @@ class ColorComponent {
             historyInfo.style.color = ColorUtils.calculateContrastColor(item.color);
             historyInfo.style.fontWeight = 'bold';
             historyInfo.innerHTML = item.gradient ? 
-                `${item.date}<br>HEX: ${item.color} → ${item.secondColor}<br>RGB_1(${item.rgb})<br>RGB_2(${item.rgb2})` :
-                `${item.date}<br>HEX: ${item.color} <br>RGB(${item.rgb})`;
+                `${item.date}<br>HEX: ${item.color} → ${item.secondColor}<br>RGB_1(${item.rgb})<br>RGB_2(${item.rgb2})<br>(${item.randomSeed})` :
+                `${item.date}<br>HEX: ${item.color} <br>RGB(${item.rgb})<br>(${item.randomSeed})`;
 
             const historyCardNumber = document.createElement('div');
             historyCardNumber.className = 'card-number';

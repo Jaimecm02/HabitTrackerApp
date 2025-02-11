@@ -99,36 +99,6 @@
     opacity: 0.9;
 }
 
-/* Chinese Character and Translation Display */
-@font-face {
-    font-family: "MaShanZheng";
-    src: url('../assets/MaShanZheng-Regular.ttf');
-}
-
-.chinese-character {
-    position: absolute;
-    top: 45%;
-    left: 50%;
-    transform: translate(-50%, -50%) translateZ(20px);
-    font-size: 8rem;
-    font-family: "MashanZheng";
-    opacity: 0.8;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.chinese-translation {
-    position: absolute;
-    top: 65%;
-    left: 50%;
-    transform: translate(-50%, 0) translateZ(20px);
-    font-family: "STKaiti", "KaiTi", "DFKai-SB", "KaiTi_GB2312", "SimKai", serif;
-    font-size: 1.5rem;
-    font-weight: bold;
-    text-align: center;
-    opacity: 0.8;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-}
-
 /* History Section Styles */
 .history-section {
     width: 100%;

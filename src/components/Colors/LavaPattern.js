@@ -5,7 +5,15 @@ class LavaPattern {
         this.blobCount = 7;
     }
 
-    addPattern(card, cardColor, secondColor = null) {
+    initSeedRandom(seed) {
+        // Simple seeded random number generator
+        this.seedRandom = () => {
+            seed = (seed * 1680700353460) % 2147483647;
+            return (seed - 1) / 2147483646;
+        };
+    }
+
+    addPattern(card, cardColor, secondColor = null, randomSeed) {
         const uniqueId = `lava-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
         svg.classList.add('lava-pattern');
@@ -38,6 +46,12 @@ class LavaPattern {
             </radialGradient>
         `;
         svg.appendChild(defs);
+
+        // Use the seed to determine number of blobs (between 7 and 12)
+        this.initSeedRandom(randomSeed);
+        this.blobCount = Math.floor(this.seedRandom() * 6) + 7;
+        console.log(randomSeed);
+        console.log(this.blobCount);
 
         // Create blob container with unique filter reference
         const blobContainer = document.createElementNS("http://www.w3.org/2000/svg", "g");
