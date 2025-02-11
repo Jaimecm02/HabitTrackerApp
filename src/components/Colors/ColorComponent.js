@@ -2,6 +2,7 @@ const GemPattern = require('./GemPattern');
 const WebPattern = require('./WebPattern');
 const ChinesePattern = require('./ChinesePattern');
 const LavaPattern = require('./LavaPattern');
+const ScalesPattern = require('./ScalesPattern');
 const ColorUtils = require('./ColorUtils');
 const fs = require('fs');
 const path = require('path');
@@ -14,6 +15,7 @@ class ColorComponent {
         this.webPattern = new WebPattern();
         this.chinesePattern = new ChinesePattern();
         this.lavaPattern = new LavaPattern();
+        this.scalesPattern = new ScalesPattern();
         this.dbName = 'ColorHistoryDB';
         this.storeName = 'colorHistory';
         this.db = null; 
@@ -117,7 +119,7 @@ class ColorComponent {
                 }
 
                 // Only generate new color if there's no existing entry
-                const { color, secondColor, holographic, gradient, gem, web, chinese, lava, rotateCard } = this.generateRandomColor();
+                const { color, secondColor, holographic, gradient, gem, web, chinese, lava, rotateCard, scales } = this.generateRandomColor();
                 let chineseChar = null;
                 let chineseTranslation = null;
                 
@@ -144,7 +146,8 @@ class ColorComponent {
                     cardNumber: 0,
                     liked: false,
                     randomSeed: Math.random(),
-                    rotateCard
+                    rotateCard,
+                    scales
                 };
                 
                 this.saveColorToHistory(data, true);
@@ -170,13 +173,15 @@ class ColorComponent {
         const gradient = Math.random() < 0.065; // 6.5% chance of gradient color (two every 30 days)
     
         const rotateCard = Math.random() < 0.01; // 1% chance of rotated card
+
         const patternRoll = Math.random();
         const gem = patternRoll < 0.01; // 1% chance for gem pattern
         const web = patternRoll >= 0.01 && patternRoll < 0.02; // 1% chance for web pattern
         const chinese = patternRoll >= 0.02 && patternRoll < 0.03; // 1% chance for Chinese character
         const lava = patternRoll >= 0.03 && patternRoll < 0.04; // 1% chance for lava pattern
+        const scales = patternRoll >= 0.04 && patternRoll < 0.05; // 1% chance for scales pattern
 
-        return { color, secondColor, holographic, gradient, gem, web, chinese, lava, rotateCard };
+        return { color, secondColor, holographic, gradient, gem, web, chinese, lava, rotateCard, scales };
     }
 
     saveColorToHistory(data) {
@@ -230,13 +235,13 @@ class ColorComponent {
             return;
         }
         this.container.innerHTML = '';
-        this.generateDailyColor().then(({ color, secondColor, holographic, gradient, gem, web, chinese, lava, chineseChar, chineseTranslation, rotateCard, randomSeed }) => {
+        this.generateDailyColor().then(({ color, secondColor, holographic, gradient, gem, web, chinese, lava, chineseChar, chineseTranslation, rotateCard, randomSeed, scales }) => {
             const rgbColor = ColorUtils.hexToRgbString(color);
             const textColor = ColorUtils.calculateContrastColor(color);
             const today = new Date().toDateString();
 
             // Save today's color to history with all properties
-            this.saveColorToHistory({ color, secondColor, date: today, holographic, gradient, gem, web, chinese, lava, chineseChar, chineseTranslation, rotateCard, randomSeed });
+            this.saveColorToHistory({ color, secondColor, date: today, holographic, gradient, gem, web, chinese, lava, chineseChar, chineseTranslation, rotateCard, randomSeed, scales });
 
             // Get updated color history
             this.getColorHistory().then(colorHistory => {
@@ -245,7 +250,7 @@ class ColorComponent {
                 // Create main color card
                 const card = document.createElement('div');
                 card.id = 'color-card-' + Date.now();
-                card.className = `color-card${holographic ? ' holographic' : ''}${gem ? ' gem' : ''}${web ? ' web' : ''}${chinese ? ' chinese' : ''}${lava ? ' lava' : ''}`;
+                card.className = `color-card${holographic ? ' holographic' : ''}${gem ? ' gem' : ''}${web ? ' web' : ''}${chinese ? ' chinese' : ''}${lava ? ' lava' : ''}${scales ? ' scales' : ''}`;
                 if (gradient) {
                     card.style.background = `linear-gradient(45deg, ${color}, ${secondColor})`;
                 } else {
@@ -255,11 +260,13 @@ class ColorComponent {
                 if (gem) {
                     this.gemPattern.addDelaunayPattern(card, randomSeed);
                 } else if (web) {
-                    this.webPattern.addPattern(card, randomSeed);
+                    this.webPattern.addPattern(card, randomSeed, color);
                 } else if (chinese) {
                     this.chinesePattern.addChineseCharacter(card, color, chineseChar, chineseTranslation);
                 } else if (lava) {
                     this.lavaPattern.addPattern(card, color, gradient ? secondColor : null, randomSeed);
+                } else if (scales) {
+                    this.scalesPattern.addScalesPattern(card, randomSeed, color, gradient ? secondColor : null);
                 }
 
                 const colorInfo = document.createElement('div');
@@ -347,7 +354,7 @@ class ColorComponent {
 
         colorHistory.forEach((item, index) => {
             const historyCard = document.createElement('div');
-            historyCard.className = `history-card${item.holographic ? ' holographic' : ''}${item.gem ? ' gem' : ''}${item.web ? ' web' : ''}${item.chinese ? ' chinese' : ''}${item.lava ? ' lava' : ''}`;
+            historyCard.className = `history-card${item.holographic ? ' holographic' : ''}${item.gem ? ' gem' : ''}${item.web ? ' web' : ''}${item.chinese ? ' chinese' : ''}${item.lava ? ' lava' : ''}${item.scales ? ' scales' : ''}`;
             if (item.gradient) {
                 historyCard.style.background = `linear-gradient(45deg, ${item.color}, ${item.secondColor})`;
             } else {
@@ -362,6 +369,8 @@ class ColorComponent {
                 this.chinesePattern.addChineseCharacter(historyCard, item.color, item.chineseChar, item.chineseTranslation);
             } else if (item.lava) {
                 this.lavaPattern.addPattern(historyCard, item.color, item.gradient ? item.secondColor : null, item.randomSeed);
+            } else if (item.scales) {
+                this.scalesPattern.addScalesPattern(historyCard, item.randomSeed, item.color, item.gradient ? item.secondColor : null);
             }
 
             const historyInfo = document.createElement('div');
