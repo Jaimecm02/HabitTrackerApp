@@ -8,6 +8,10 @@ const fs = require('fs');
 const path = require('path');
 const { type } = require('os');
 
+const MainCard = require('./MainCard');
+const HistoryCard = require('./HistoryCard');
+const HeartButton = require('./HeartButton');
+
 class ColorComponent {
     constructor() {
         this.container = document.getElementById('colorComponent');
@@ -18,8 +22,11 @@ class ColorComponent {
         this.scalesPattern = new ScalesPattern();
         this.dbName = 'ColorHistoryDB';
         this.storeName = 'colorHistory';
-        this.db = null; 
+        this.db = null;
         this.jsonFilePath = path.join(__dirname, 'colorHistory.json');
+        this.mainCard = new MainCard(this);
+        this.historyCard = new HistoryCard(this);
+        this.heartButton = new HeartButton(this);
         this.initDB();
     }
 
@@ -235,102 +242,19 @@ class ColorComponent {
             return;
         }
         this.container.innerHTML = '';
-        this.generateDailyColor().then(({ color, secondColor, holographic, gradient, gem, web, chinese, lava, chineseChar, chineseTranslation, rotateCard, randomSeed, scales }) => {
-            const rgbColor = ColorUtils.hexToRgbString(color);
-            const textColor = ColorUtils.calculateContrastColor(color);
+        this.generateDailyColor().then((data) => {
             const today = new Date().toDateString();
 
             // Save today's color to history with all properties
-            this.saveColorToHistory({ color, secondColor, date: today, holographic, gradient, gem, web, chinese, lava, chineseChar, chineseTranslation, rotateCard, randomSeed, scales });
+            this.saveColorToHistory({ ...data, date: today });
 
             // Get updated color history
             this.getColorHistory().then(colorHistory => {
                 const cardIndex = colorHistory.findIndex(item => item.date === today) + 1;
 
                 // Create main color card
-                const card = document.createElement('div');
-                card.id = 'color-card-' + Date.now();
-                card.className = `color-card${holographic ? ' holographic' : ''}
-                                            ${gem ? ' gem' : ''}
-                                            ${web ? ' web' : ''}
-                                            ${chinese ? ' chinese' : ''}
-                                            ${lava ? ' lava' : ''}
-                                            ${scales ? ' scales' : ''}`;
-                if (gradient) {
-                    card.style.background = `linear-gradient(45deg, ${color}, ${secondColor})`;
-                } else {
-                    card.style.backgroundColor = color;
-                }
-
-                if (gem) {
-                    this.gemPattern.addDelaunayPattern(card, randomSeed);
-                } else if (web) {
-                    this.webPattern.addPattern(card, randomSeed, color);
-                } else if (chinese) {
-                    this.chinesePattern.addChineseCharacter(card, color, chineseChar, chineseTranslation);
-                } else if (lava) {
-                    this.lavaPattern.addPattern(card, color, gradient ? secondColor : null, randomSeed);
-                } else if (scales) {
-                    this.scalesPattern.addScalesPattern(card, randomSeed, color, gradient ? secondColor : null);
-                }
-
-                const colorInfo = document.createElement('div');
-                colorInfo.className = 'color-info';
-                colorInfo.style.color = textColor;
-                
-                const hexCode = document.createElement('div');
-                hexCode.className = 'color-code';
-                hexCode.style.fontWeight = 'bold';
-                hexCode.textContent = gradient ? 
-                    `HEX: ${color.toUpperCase()} → ${secondColor.toUpperCase()}` :
-                    `HEX: ${color.toUpperCase()}`;
-
-                const rgbCode = document.createElement('div');
-                rgbCode.className = 'color-code';
-                rgbCode.style.fontWeight = 'bold';
-                rgbCode.innerHTML = gradient ?
-                    `RGB_1(${rgbColor})<br>RGB_2(${ColorUtils.hexToRgbString(secondColor)})<br>` :
-                    `RGB(${rgbColor})`;
-
-                const cardNumber = document.createElement('div');
-                cardNumber.className = 'card-number';
-                cardNumber.style.fontWeight = 'bold'; 
-                cardNumber.textContent = cardIndex;
-                cardNumber.style.position = 'absolute';
-                cardNumber.style.top = '10px';
-                cardNumber.style.right = '10px';
-                cardNumber.style.color = textColor;
-
-                colorInfo.appendChild(hexCode);
-                colorInfo.appendChild(rgbCode);
-                card.appendChild(colorInfo);
-                card.appendChild(cardNumber);
+                const card = this.mainCard.createMainCard({ ...data, cardNumber: cardIndex });
                 this.container.appendChild(card);
-
-                const cardData = {
-                    color,
-                    secondColor,
-                    date: today,
-                    holographic,
-                    gradient,
-                    gem,
-                    web,
-                    chinese,
-                    lava,
-                    chineseChar,
-                    chineseTranslation,
-                    liked: this.isColorLiked(color),
-                    cardNumber: cardIndex,
-                    randomSeed
-                };
-
-                // Add heart button to main card
-                const heartButton = this.createHeartButton(color, cardData);
-                card.appendChild(heartButton);
-
-                // Add mouse move handlers to main card
-                card.addEventListener('mousemove', (e) => this.handleMouseMove(e, card));
-                card.addEventListener('mouseleave', (e) => this.handleMouseLeave(e, card));
 
                 // Add history section
                 this.addHistorySection(colorHistory);
@@ -357,63 +281,9 @@ class ColorComponent {
         // Sort by date in descending order (most recent first)
         colorHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-        colorHistory.forEach((item, index) => {
-            const historyCard = document.createElement('div');
-            historyCard.className = `history-card${item.holographic ? ' holographic' : ''}
-                                                ${item.gem ? ' gem' : ''}
-                                                ${item.web ? ' web' : ''}
-                                                ${item.chinese ? ' chinese' : ''}
-                                                ${item.lava ? ' lava' : ''}
-                                                ${item.scales ? ' scales' : ''}`;
-            if (item.gradient) {
-                historyCard.style.background = `linear-gradient(45deg, ${item.color}, ${item.secondColor})`;
-            } else {
-                historyCard.style.backgroundColor = item.color;
-            }
-
-            if (item.gem) {
-                this.gemPattern.addDelaunayPattern(historyCard, item.randomSeed);
-            } else if (item.web) {
-                this.webPattern.addPattern(historyCard, item.randomSeed);
-            } else if (item.chinese) {
-                this.chinesePattern.addChineseCharacter(historyCard, item.color, item.chineseChar, item.chineseTranslation);
-            } else if (item.lava) {
-                this.lavaPattern.addPattern(historyCard, item.color, item.gradient ? item.secondColor : null, item.randomSeed);
-            } else if (item.scales) {
-                this.scalesPattern.addScalesPattern(historyCard, item.randomSeed, item.color, item.gradient ? item.secondColor : null);
-            }
-
-            const historyInfo = document.createElement('div');
-            historyInfo.className = 'history-info';
-            historyInfo.style.color = ColorUtils.calculateContrastColor(item.color);
-            historyInfo.style.fontWeight = 'bold';
-            historyInfo.innerHTML = item.gradient ? 
-                `${item.date}<br>HEX: ${item.color} → ${item.secondColor}<br>RGB_1(${item.rgb})<br>RGB_2(${item.rgb2})<br>(${item.randomSeed})` :
-                `${item.date}<br>HEX: ${item.color} <br>RGB(${item.rgb})<br>(${item.randomSeed})`;
-
-            const historyCardNumber = document.createElement('div');
-            historyCardNumber.className = 'card-number';
-            historyCardNumber.style.fontWeight = 'bold';
-            historyCardNumber.textContent = item.cardNumber;
-            historyCardNumber.style.position = 'absolute';
-            historyCardNumber.style.top = '10px';
-            historyCardNumber.style.right = '10px';
-            historyCardNumber.style.color = ColorUtils.calculateContrastColor(item.color);
-
-            historyCard.appendChild(historyInfo);
-            historyCard.appendChild(historyCardNumber);
+        colorHistory.forEach((item) => {
+            const historyCard = this.historyCard.createHistoryCard(item);
             historyContainer.appendChild(historyCard);
-
-            // Add heart button to history cards
-            const heartButton = this.createHeartButton(item.color, item);
-            historyCard.appendChild(heartButton);
-
-            // Add mouse move handlers to history cards
-            historyCard.addEventListener('mousemove', (e) => this.handleMouseMove(e, historyCard));
-            historyCard.addEventListener('mouseleave', (e) => this.handleMouseLeave(e, historyCard));
-            historyCard.addEventListener('click', () => {
-                console.log(`History card clicked`);
-            });
         });
 
         historySection.appendChild(historyTitle);
@@ -448,56 +318,11 @@ class ColorComponent {
     }
 
     createHeartButton(color, cardData) {
-        const button = document.createElement('button');
-        button.className = 'like-button';
-        button.innerHTML = `
-            <svg viewBox="0 0 24 24">
-                <path class="heart-path" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-            </svg>`;
-        
-        const textColor = ColorUtils.calculateContrastColor(color);
-        button.style.color = textColor;
-
-        // Check liked status from database
-        this.isColorLiked(cardData.cardNumber).then(isLiked => {
-            if (isLiked) {
-                button.classList.add('liked');
-            }
-        });
-
-        button.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.toggleLikeColor(button, cardData);
-        });
-
-        return button;
+        return this.heartButton.createHeartButton(color, cardData);
     }
 
     toggleLikeColor(button, cardData) {
-        const isLiked = button.classList.toggle('liked');
-        
-        const transaction = this.db.transaction([this.storeName], 'readwrite');
-        const store = transaction.objectStore(this.storeName);
-        
-        // Find the record using cardNumber
-        const request = store.get(cardData.cardNumber);
-        
-        request.onsuccess = (event) => {
-            const record = event.target.result;
-            if (record) {
-                record.liked = isLiked;
-                store.put(record).onsuccess = () => {
-                    // Update UI for all instances of this color
-                    document.querySelectorAll('.history-card, .color-card').forEach(card => {
-                        const heartBtn = card.querySelector('.like-button');
-                        if (heartBtn && parseInt(card.querySelector('.card-number').textContent) === cardData.cardNumber) {
-                            heartBtn.className = `like-button${isLiked ? ' liked' : ''}`;
-                        }
-                    });
-                    this.saveToJSON(); // Sync to JSON after updating
-                };
-            }
-        };
+        this.heartButton.toggleLikeColor(button, cardData);
     }
 
     isColorLiked(cardNumber) {
