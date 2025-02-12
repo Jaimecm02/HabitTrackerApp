@@ -1,8 +1,8 @@
-const GemPattern = require('./GemPattern');
-const WebPattern = require('./WebPattern');
-const ChinesePattern = require('./ChinesePattern');
-const LavaPattern = require('./LavaPattern');
-const ScalesPattern = require('./ScalesPattern');
+const GemPattern = require('./patterns/GemPattern');
+const WebPattern = require('./patterns/WebPattern');
+const ChinesePattern = require('./patterns/ChinesePattern');
+const LavaPattern = require('./patterns/LavaPattern');
+const ScalesPattern = require('./patterns/ScalesPattern');
 const ColorUtils = require('./ColorUtils');
 const fs = require('fs');
 const path = require('path');
@@ -80,6 +80,51 @@ class ColorComponent {
         } catch (err) {
             console.error('Error loading from JSON:', err);
         }
+    }
+
+    saveColorToHistory(data) {
+        if (!this.db) {
+            console.error('Database is not initialized.');
+            return;
+        }
+
+        const transaction = this.db.transaction([this.storeName], 'readwrite');
+        const store = transaction.objectStore(this.storeName);
+        const request = store.getAll();
+
+        request.onsuccess = (event) => {
+            const allEntries = event.target.result;
+            const existingEntry = allEntries.find(entry => entry.date === data.date);
+            
+            if (existingEntry) {
+                // If entry exists, don't save again
+                return;
+            }
+
+            const cardNumber = allEntries.length + 1;
+            data.cardNumber = cardNumber;
+
+            store.put(data).onsuccess = () => {
+                console.log('Color history saved successfully.');
+                this.saveToJSON();
+            };
+        };
+    }
+
+    getColorHistory() {
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction([this.storeName], 'readonly');
+            const store = transaction.objectStore(this.storeName);
+            const request = store.getAll();
+
+            request.onsuccess = (event) => {
+                resolve(event.target.result);
+            };
+
+            request.onerror = (event) => {
+                reject(event.target.error);
+            };
+        });
     }
 
     updateCardNumbers() {
@@ -184,51 +229,6 @@ class ColorComponent {
         return { color, secondColor, holographic, gradient, gem, web, chinese, lava, rotateCard, scales };
     }
 
-    saveColorToHistory(data) {
-        if (!this.db) {
-            console.error('Database is not initialized.');
-            return;
-        }
-
-        const transaction = this.db.transaction([this.storeName], 'readwrite');
-        const store = transaction.objectStore(this.storeName);
-        const request = store.getAll();
-
-        request.onsuccess = (event) => {
-            const allEntries = event.target.result;
-            const existingEntry = allEntries.find(entry => entry.date === data.date);
-            
-            if (existingEntry) {
-                // If entry exists, don't save again
-                return;
-            }
-
-            const cardNumber = allEntries.length + 1;
-            data.cardNumber = cardNumber;
-
-            store.put(data).onsuccess = () => {
-                console.log('Color history saved successfully.');
-                this.saveToJSON();
-            };
-        };
-    }
-
-    getColorHistory() {
-        return new Promise((resolve, reject) => {
-            const transaction = this.db.transaction([this.storeName], 'readonly');
-            const store = transaction.objectStore(this.storeName);
-            const request = store.getAll();
-
-            request.onsuccess = (event) => {
-                resolve(event.target.result);
-            };
-
-            request.onerror = (event) => {
-                reject(event.target.error);
-            };
-        });
-    }
-
     setupComponent() {
         if (!this.db) {
             console.error('Database is not initialized.');
@@ -250,7 +250,12 @@ class ColorComponent {
                 // Create main color card
                 const card = document.createElement('div');
                 card.id = 'color-card-' + Date.now();
-                card.className = `color-card${holographic ? ' holographic' : ''}${gem ? ' gem' : ''}${web ? ' web' : ''}${chinese ? ' chinese' : ''}${lava ? ' lava' : ''}${scales ? ' scales' : ''}`;
+                card.className = `color-card${holographic ? ' holographic' : ''}
+                                            ${gem ? ' gem' : ''}
+                                            ${web ? ' web' : ''}
+                                            ${chinese ? ' chinese' : ''}
+                                            ${lava ? ' lava' : ''}
+                                            ${scales ? ' scales' : ''}`;
                 if (gradient) {
                     card.style.background = `linear-gradient(45deg, ${color}, ${secondColor})`;
                 } else {
@@ -354,7 +359,12 @@ class ColorComponent {
 
         colorHistory.forEach((item, index) => {
             const historyCard = document.createElement('div');
-            historyCard.className = `history-card${item.holographic ? ' holographic' : ''}${item.gem ? ' gem' : ''}${item.web ? ' web' : ''}${item.chinese ? ' chinese' : ''}${item.lava ? ' lava' : ''}${item.scales ? ' scales' : ''}`;
+            historyCard.className = `history-card${item.holographic ? ' holographic' : ''}
+                                                ${item.gem ? ' gem' : ''}
+                                                ${item.web ? ' web' : ''}
+                                                ${item.chinese ? ' chinese' : ''}
+                                                ${item.lava ? ' lava' : ''}
+                                                ${item.scales ? ' scales' : ''}`;
             if (item.gradient) {
                 historyCard.style.background = `linear-gradient(45deg, ${item.color}, ${item.secondColor})`;
             } else {

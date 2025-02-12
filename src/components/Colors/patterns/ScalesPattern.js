@@ -45,8 +45,13 @@ class ScalesPattern {
     }
 
     drawScales(ctx, scales, color, secondColor = null, gradientType = 'perScale') {
-        ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)'; // Lighter stroke for subtle effect
-        ctx.lineWidth = 1;
+        // If secondColor is provided, force global gradient
+        if (secondColor) {
+            gradientType = 'global';
+        }
+
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+        ctx.lineWidth = 0.5;
     
         function hexToRgb(hex) {
             const bigint = parseInt(hex.slice(1), 16);
@@ -60,33 +65,35 @@ class ScalesPattern {
                 Math.max(0, Math.min(255, color[2] + amount))
             ];
         }
+
+        function getRgbaString(rgb, alpha) {
+            return `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha})`;
+        }
     
         const baseColor = hexToRgb(color);
-        const lightColor = adjustColor(baseColor, 5); // Softer highlight
-        const darkColor = adjustColor(baseColor, -5); // Softer shadow
+        const lightColor = adjustColor(baseColor, 3);
+        const veryLightColor = adjustColor(baseColor, 8);
+        const darkColor = adjustColor(baseColor, -3);
+        const veryDarkColor = adjustColor(baseColor, -8);
     
-        const lightColorStr = `rgb(${lightColor[0]}, ${lightColor[1]}, ${lightColor[2]})`;
-        const darkColorStr = `rgb(${darkColor[0]}, ${darkColor[1]}, ${darkColor[2]})`;
-    
-        let secondColorRgb = null;
-        if (secondColor) {
-            secondColorRgb = hexToRgb(secondColor);
-        }
+        let secondColorRgb = secondColor ? hexToRgb(secondColor) : null;
     
         scales.sort((a, b) => a.y - b.y);
     
         if (gradientType === 'global') {
             // Create a global gradient for the entire card
             const globalGradient = ctx.createLinearGradient(0, 0, ctx.canvas.width, ctx.canvas.height);
-    
+            
+            // Enhanced global gradient with smoother transitions
             if (secondColorRgb) {
-                // Use base color and second color for the gradient
-                globalGradient.addColorStop(0, `rgb(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2]})`);
-                globalGradient.addColorStop(1, `rgb(${secondColorRgb[0]}, ${secondColorRgb[1]}, ${secondColorRgb[2]})`);
+                globalGradient.addColorStop(0, getRgbaString(baseColor, 1));
+                globalGradient.addColorStop(0.3, getRgbaString(adjustColor(baseColor, 5), 0.95));
+                globalGradient.addColorStop(0.5, getRgbaString(secondColorRgb, 0.9));
+                globalGradient.addColorStop(0.7, getRgbaString(adjustColor(secondColorRgb, -5), 0.95));
+                globalGradient.addColorStop(1, getRgbaString(secondColorRgb, 1));
             } else {
-                // Use base color for both ends of the gradient (solid color)
-                globalGradient.addColorStop(0, `rgb(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2]})`);
-                globalGradient.addColorStop(1, `rgb(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2]})`);
+                globalGradient.addColorStop(0, getRgbaString(baseColor, 1));
+                globalGradient.addColorStop(1, getRgbaString(baseColor, 1));
             }
     
             ctx.fillStyle = globalGradient;
@@ -94,33 +101,45 @@ class ScalesPattern {
     
         scales.forEach(scale => {
             if (gradientType === 'perScale') {
-                const gradient = ctx.createRadialGradient(
-                    scale.x, scale.y - scale.radius * 0.2, scale.radius * 0.4, // Larger highlight area
-                    scale.x, scale.y, scale.radius
+                // Create multiple gradients for more complex lighting effect
+                const mainGradient = ctx.createRadialGradient(
+                    scale.x, scale.y - scale.radius * 0.15, 0,
+                    scale.x, scale.y, scale.radius * 1.05
                 );
-    
-                if (secondColorRgb) {
-                    // Blend the second color into the gradient
-                    const midColor = [
-                        (baseColor[0] + secondColorRgb[0]) / 2,
-                        (baseColor[1] + secondColorRgb[1]) / 2,
-                        (baseColor[2] + secondColorRgb[2]) / 2
-                    ];
-                    gradient.addColorStop(0, lightColorStr);
-                    gradient.addColorStop(0.2, `rgb(${midColor[0]}, ${midColor[1]}, ${midColor[2]})`); // Adjusted color stop
-                    gradient.addColorStop(1, darkColorStr);
-                } else {
-                    gradient.addColorStop(0, lightColorStr);
-                    gradient.addColorStop(0.2, `rgb(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2]})`); // Adjusted color stop
-                    gradient.addColorStop(1, darkColorStr);
-                }
-    
-                ctx.fillStyle = gradient;
+
+                const highlightGradient = ctx.createRadialGradient(
+                    scale.x, scale.y - scale.radius * 0.3, scale.radius * 0.1,
+                    scale.x, scale.y - scale.radius * 0.2, scale.radius * 0.8
+                );
+        
+                // Single color gradient since second color forces global
+                mainGradient.addColorStop(0, getRgbaString(veryLightColor, 0.95));
+                mainGradient.addColorStop(0.3, getRgbaString(lightColor, 0.9));
+                mainGradient.addColorStop(0.5, getRgbaString(baseColor, 0.85));
+                mainGradient.addColorStop(0.7, getRgbaString(darkColor, 0.85));
+                mainGradient.addColorStop(1, getRgbaString(veryDarkColor, 0.9));
+        
+                // Draw the main shape with the gradient
+                ctx.beginPath();
+                ctx.arc(scale.x, scale.y, scale.radius, 0, Math.PI * 2);
+                ctx.fillStyle = mainGradient;
+                ctx.fill();
+                
+                // Add subtle highlight overlay
+                ctx.beginPath();
+                ctx.arc(scale.x, scale.y, scale.radius, 0, Math.PI * 2);
+                ctx.fillStyle = highlightGradient;
+                ctx.globalCompositeOperation = 'overlay';
+                ctx.fill();
+                ctx.globalCompositeOperation = 'source-over';
+            } else {
+                // For global gradient, just draw the circles
+                ctx.beginPath();
+                ctx.arc(scale.x, scale.y, scale.radius, 0, Math.PI * 2);
+                ctx.fill();
             }
-    
-            ctx.beginPath();
-            ctx.arc(scale.x, scale.y, scale.radius, 0, Math.PI * 2);
-            ctx.fill();
+            
+            // Add very subtle stroke
             ctx.stroke();
         });
     }

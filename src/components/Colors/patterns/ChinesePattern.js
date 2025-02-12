@@ -1,4 +1,4 @@
-const ColorUtils = require('./ColorUtils');
+const ColorUtils = require('../ColorUtils');
 
 class ChinesePattern {
     getRandomChineseCharacter() {
