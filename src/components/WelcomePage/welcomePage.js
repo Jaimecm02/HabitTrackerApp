@@ -30,7 +30,6 @@ class WelcomePage {
         this.updateDate();
         await this.loadTodayHabits();
         this.attachEventListeners();
-        this.addMouseMoveListeners();
     }
 
     getGreeting() {
@@ -44,23 +43,39 @@ class WelcomePage {
         const newHabitBtn = this.container.querySelector('#newHabitBtn');
         const viewStatsBtn = this.container.querySelector('#viewStatsBtn');
         
-        newHabitBtn.addEventListener('click', () => this.ipcRenderer.send('open-new-habit'));
-        viewStatsBtn.addEventListener('click', () => this.ipcRenderer.send('open-statistics'));
-    }
-
-    addMouseMoveListeners() {
-        const cards = this.container.querySelectorAll(".habit-card");
-        cards.forEach(card => {
-            card.addEventListener("mousemove", this.handleMouseMove.bind(this));
+        // Navigate to the habits component when "Create New Habit" is clicked
+        newHabitBtn.addEventListener('click', () => {
+            // Hide all content sections
+            const contentSections = document.querySelectorAll('#content > div');
+            contentSections.forEach(div => {
+                div.style.display = 'none';
+            });
+    
+            // Show the habit component
+            document.getElementById('habitComponent').style.display = 'block';
+    
+            // Update the active link in the sidebar
+            const sidebarLinks = document.querySelectorAll('#sidebar a');
+            sidebarLinks.forEach(a => a.classList.remove('active'));
+            document.querySelector('#sidebar a[href="#habitComponent"]').classList.add('active');
         });
-    }
-
-    handleMouseMove(e) {
-        const rect = e.currentTarget.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left - rect.width / 2;
-        const mouseY = e.clientY - rect.top - rect.height / 2;
-        const angle = (Math.atan2(mouseY, mouseX) * (180 / Math.PI) + 360) % 360;
-        e.currentTarget.style.setProperty("--start", angle + 60);
+    
+        // Navigate to the analytics component when "View Statistics" is clicked
+        viewStatsBtn.addEventListener('click', () => {
+            // Hide all content sections
+            const contentSections = document.querySelectorAll('#content > div');
+            contentSections.forEach(div => {
+                div.style.display = 'none';
+            });
+    
+            // Show the analytics component
+            document.getElementById('analyticsComponent').style.display = 'block';
+    
+            // Update the active link in the sidebar
+            const sidebarLinks = document.querySelectorAll('#sidebar a');
+            sidebarLinks.forEach(a => a.classList.remove('active'));
+            document.querySelector('#sidebar a[href="#analyticsComponent"]').classList.add('active');
+        });
     }
 
     updateDate() {
@@ -96,7 +111,9 @@ class WelcomePage {
     createHabitCard(habit, isCompleted) {
         const div = document.createElement('div');
         div.className = 'habit-card';
-        div.style.setProperty('--habit-color', habit.color); // Set the habit color
+        div.style.setProperty('--glow-color-1', `${habit.color}`);
+        div.style.setProperty('--glow-color-2', `${this.lightenColor(habit.color, 20)}`);
+        div.style.setProperty('--glow-color-3', `${this.darkenColor(habit.color, 20)}`);
         div.innerHTML = `
             <div class="glow"></div>
             <div class="habit-status ${isCompleted ? 'completed' : 'pending'}" style="background-color: ${isCompleted ? habit.color : '#ccc'}"></div>
@@ -106,6 +123,24 @@ class WelcomePage {
             </div>
         `;
         return div;
+    }
+
+    lightenColor(color, percent) {
+        const num = parseInt(color.replace("#", ""), 16);
+        const amt = Math.round(2.55 * percent);
+        const R = (num >> 16) + amt;
+        const G = (num >> 8 & 0x00FF) + amt;
+        const B = (num & 0x0000FF) + amt;
+        return `#${(0x1000000 + (R < 255 ? R : 255) * 0x10000 + (G < 255 ? G : 255) * 0x100 + (B < 255 ? B : 255)).toString(16).slice(1)}`;
+    }
+
+    darkenColor(color, percent) {
+        const num = parseInt(color.replace("#", ""), 16);
+        const amt = Math.round(2.55 * percent);
+        const R = (num >> 16) - amt;
+        const G = (num >> 8 & 0x00FF) - amt;
+        const B = (num & 0x0000FF) - amt;
+        return `#${(0x1000000 + (R > 0 ? R : 0) * 0x10000 + (G > 0 ? G : 0) * 0x100 + (B > 0 ? B : 0)).toString(16).slice(1)}`;
     }
 }
 

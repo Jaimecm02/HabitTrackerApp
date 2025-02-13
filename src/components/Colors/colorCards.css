@@ -186,7 +186,7 @@
     font-size: 1.2rem;
     font-weight: bold;
     background: transparent;
-    padding: 16px;
+    padding: 8px;
     text-align: right;
     transform: translateZ(20px);
     z-index: 10;
@@ -232,29 +232,38 @@
 /* Like Button Styles */
 .like-button {
     position: absolute;
-    top: 16px;
-    left: 16px;
-    width: 32px;
-    height: 32px;
+    top: 20px;
+    left: 20px;
+    width: 20px;
+    height: 20px;
     background: transparent;
     border: none;
     cursor: pointer;
-    z-index: 10;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     transform: translateZ(20px);
     transition: transform 0.2s ease;
+    z-index: 9999;
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .like-button svg {
     width: 100%;
     height: 100%;
     transition: all 0.3s ease;
+    display: block;
 }
 
 .like-button .heart-path {
     fill: none;
     stroke: currentColor;
     stroke-width: 2;
-    transition: fill 0.3s ease;
+    transition: fill 0.3s ease, stroke 0.3s ease;
+    vector-effect: non-scaling-stroke;
 }
 
 .like-button:hover {
@@ -264,4 +273,11 @@
 .like-button.liked .heart-path {
     fill: #ff4444;
     stroke: #ff4444;
+}
+
+/* Ensure heart button stays visible on card hover */
+.color-card:hover .like-button,
+.history-card:hover .like-button {
+    opacity: 1;
+    pointer-events: auto;
 }

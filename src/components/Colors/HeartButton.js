@@ -8,13 +8,23 @@ class HeartButton {
     createHeartButton(color, cardData) {
         const button = document.createElement('button');
         button.className = 'like-button';
+        
+        // Updated SVG with explicit dimensions and styling
         button.innerHTML = `
-            <svg viewBox="0 0 24 24">
-                <path class="heart-path" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            <svg viewBox="0 0 24 24" width="24" height="24" style="display: block;">
+                <path class="heart-path" 
+                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                    style="stroke-width: 2;"
+                />
             </svg>`;
 
         const textColor = ColorUtils.calculateContrastColor(color);
         button.style.color = textColor;
+        
+        // Ensure button is visible with proper z-index and opacity
+        button.style.opacity = '1';
+        button.style.zIndex = '9999';
+        button.style.pointerEvents = 'auto';
 
         // Check liked status from database
         this.colorComponent.isColorLiked(cardData.cardNumber).then(isLiked => {
@@ -37,7 +47,6 @@ class HeartButton {
         const transaction = this.colorComponent.db.transaction([this.colorComponent.storeName], 'readwrite');
         const store = transaction.objectStore(this.colorComponent.storeName);
 
-        // Find the record using cardNumber
         const request = store.get(cardData.cardNumber);
 
         request.onsuccess = (event) => {
@@ -52,7 +61,7 @@ class HeartButton {
                             heartBtn.className = `like-button${isLiked ? ' liked' : ''}`;
                         }
                     });
-                    this.colorComponent.saveToJSON(); // Sync to JSON after updating
+                    this.colorComponent.saveToJSON();
                 };
             }
         };

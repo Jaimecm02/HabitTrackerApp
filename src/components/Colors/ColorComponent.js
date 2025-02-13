@@ -171,7 +171,7 @@ class ColorComponent {
                 }
 
                 // Only generate new color if there's no existing entry
-                const { color, secondColor, holographic, gradient, gem, web, chinese, lava, rotateCard, scales } = this.generateRandomColor();
+                const { color, secondColor, holographic, gradient, gem, web, chinese, lava, rotateCard, scales, borderType } = this.generateRandomColor();
                 let chineseChar = null;
                 let chineseTranslation = null;
                 
@@ -199,7 +199,8 @@ class ColorComponent {
                     liked: false,
                     randomSeed: Math.random(),
                     rotateCard,
-                    scales
+                    scales,
+                    borderType
                 };
                 
                 this.saveColorToHistory(data, true);
