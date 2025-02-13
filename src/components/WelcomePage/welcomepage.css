@@ -1,0 +1,204 @@
+@import '../../styles/variables.css';
+
+.welcome-container {
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.welcome-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    animation: fadeIn 0.8s ease-in;
+}
+
+.welcome-header h1 {
+    font-size: 2.5rem;
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+}
+
+.current-date {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+}
+
+.welcome-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.info-card {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    border: var(--card-border);
+}
+
+.info-card h2 {
+    color: var(--text-color);
+    margin-bottom: 1rem;
+}
+
+.info-card p {
+    color: var(--text-secondary);
+    margin: 0.5rem 0;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.habits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.habit-card {
+    --start: 0;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 80%;
+    height: 100px;
+    padding: 1rem;
+    background-color: var(--card-dark-bg);
+    border-radius: 14px;
+    transition: border-color 0.3s ease-in-out;
+    overflow: hidden;
+}
+
+.habit-card::before {
+    position: absolute;
+    content: "";
+    width: 100%;
+    height: 100%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 14px;
+    border: 2px solid transparent;
+    background: linear-gradient(45deg, #12c2e9, #c471ed, #f64f59);
+    background-size: 200% 200%;
+    animation: gradientMove 8s ease infinite;
+    background-attachment: fixed;
+    mask: linear-gradient(#0000, #0000), conic-gradient(from calc((var(--start) - (20 * 1.1)) * 1deg), #ffffff1f 0deg, white, #ffffff00 100deg);
+    mask-composite: intersect;
+    mask-clip: padding-box, border-box;
+    opacity: 0;
+    transition: 0.5s ease;
+}
+
+.glow {
+    pointer-events: none;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    filter: blur(20px);
+    transition: all 0.4s ease;
+}
+
+.glow::before {
+    position: absolute;
+    content: "";
+    width: 98%;
+    height: 98%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 14px;
+    border: 18px solid transparent;
+    background: linear-gradient(45deg, #12c2e9, #c471ed, #f64f59);
+    background-size: 200% 200%;
+    animation: gradientMove 8s ease infinite;
+    mask: linear-gradient(#0000, #0000), conic-gradient(from calc((var(--start) - (20 * 1.1)) * 1deg), #000 0deg, #ffffff, rgba(0, 0, 0, 0) 100deg);
+    mask-composite: intersect;
+    mask-clip: padding-box, border-box;
+    opacity: 0;
+    transition: all 0.6s ease;
+}
+
+.habit-card:hover > .glow::before {
+    opacity: 0.8;
+    filter: blur(25px);
+    transform: translate(-50%, -50%) scale(1.05);
+}
+
+.habit-card:hover::before {
+    opacity: 0.8;
+    background-size: 150% 150%;
+}
+
+.habit-status {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    position: relative;
+    background-color: #444;
+    border: 2px solid #666;
+    z-index: 3;
+}
+
+.habit-status.completed::after {
+    content: "✓";
+    color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 14px;
+}
+
+.habit-details {
+    flex-grow: 1;
+    z-index: 3;
+}
+
+.habit-details h3 {
+    margin: 0;
+    color: var(--text-color);
+    font-size: 1.1rem;
+}
+
+.habit-details p {
+    margin: 0.25rem 0 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+#newHabitBtn, #viewStatsBtn {
+    background: var(--primary-color);
+    color: var(--text-color);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    margin: 0.5rem;
+    transition: opacity 0.2s;
+}
+
+#newHabitBtn:hover, #viewStatsBtn:hover {
+    opacity: 0.9;
+}
+
+@keyframes gradientMove {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}

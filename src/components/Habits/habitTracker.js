@@ -1,3 +1,5 @@
+const { calculateStreak, getStreakLevel, createYearGrid } = require('./habitsUtils');
+
 class HabitTracker {
     constructor(containerId, ipcRenderer) {
         console.log('HabitTracker constructor called');
@@ -109,48 +111,15 @@ class HabitTracker {
         });
     }
 
-    calculateStreak(dates) {
-        if (!dates || dates.length === 0) return 0;
-        
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        
-        const sortedDates = [...dates].sort((a, b) => new Date(b) - new Date(a));
-        let streak = 0;
-        let currentDate = today;
-
-        for (const date of sortedDates) {
-            const habitDate = new Date(date);
-            habitDate.setHours(0, 0, 0, 0);
-
-            // Break streak if we miss a day
-            if ((currentDate - habitDate) / (1000 * 60 * 60 * 24) > 1) {
-                break;
-            }
-
-            streak++;
-            currentDate = habitDate;
-        }
-
-        return streak;
-    }
-
-    getStreakLevel(streak) {
-        if (streak >= 365) return 'streak-diamond';
-        if (streak >= 180) return 'streak-platinum';
-        if (streak >= 90) return 'streak-gold';
-        if (streak >= 30) return 'streak-silver';
-        if (streak >= 7) return 'streak-bronze';
-        return '';
-    }
-
     createHabitElement(habit) {
         const habitDiv = document.createElement('div');
         habitDiv.className = 'habit-item';
-        
-        const yearGrid = this.createYearGrid(habit);
-        const currentStreak = this.calculateStreak(habit.dates);
-        const streakLevel = this.getStreakLevel(currentStreak);
+        habitDiv.draggable = true; // Make the habit card draggable
+        habitDiv.dataset.habitId = habit.id; // Store the habit ID for reference
+
+        const yearGrid = createYearGrid(habit);
+        const currentStreak = calculateStreak(habit.dates);
+        const streakLevel = getStreakLevel(currentStreak);
         
         habitDiv.innerHTML = `
             <div class="habit-header">
@@ -192,7 +161,65 @@ class HabitTracker {
         editButton.addEventListener('click', () => this.showEditModal(habit));
 
         habitDiv.appendChild(yearGrid);
+
+        // Add drag-and-drop event listeners
+        habitDiv.addEventListener('dragstart', this.handleDragStart.bind(this));
+        habitDiv.addEventListener('dragover', this.handleDragOver.bind(this));
+        habitDiv.addEventListener('drop', this.handleDrop.bind(this));
+
         return habitDiv;
+    }
+
+    handleDragStart(event) {
+        // Store the ID of the habit being dragged
+        event.dataTransfer.setData('text/plain', event.target.dataset.habitId);
+        event.target.classList.add('dragging'); // Add a class for visual feedback
+    }
+
+    handleDragOver(event) {
+        event.preventDefault();
+        if (this.debounceTimeout) clearTimeout(this.debounceTimeout);
+    
+        this.debounceTimeout = setTimeout(() => {
+            const draggingElement = this.container.querySelector('.dragging');
+            const overElement = event.target.closest('.habit-item');
+    
+            if (overElement && draggingElement !== overElement) {
+                const rect = overElement.getBoundingClientRect();
+                const offset = event.clientY - rect.top;
+    
+                // Only move the element if it crosses the midpoint
+                if (offset < rect.height / 2) {
+                    this.container.querySelector('.habits-list').insertBefore(draggingElement, overElement);
+                } else {
+                    this.container.querySelector('.habits-list').insertBefore(draggingElement, overElement.nextSibling);
+                }
+            }
+        }, 1); // Adjust the debounce time as needed
+    }
+
+    handleDrop(event) {
+        event.preventDefault();
+        const draggedHabitId = event.dataTransfer.getData('text/plain');
+        const draggedElement = this.container.querySelector('.dragging');
+        draggedElement.classList.remove('dragging');
+    
+        // Get the new order of habits based on the DOM
+        const newOrder = Array.from(this.container.querySelectorAll('.habit-item')).map(el => el.dataset.habitId);
+    
+        // Update the habits array based on the new order
+        this.habits.sort((a, b) => newOrder.indexOf(a.id.toString()) - newOrder.indexOf(b.id.toString()));
+    
+        // Optionally, you can save the new order to the backend if needed
+        this.saveHabitsOrder();
+    }
+    
+    async saveHabitsOrder() {
+        try {
+            await this.ipcRenderer.invoke('save-habits-order', this.habits);
+        } catch (error) {
+            console.error('Error saving habits order:', error);
+        }
     }
 
     showEditModal(habit) {
@@ -265,77 +292,6 @@ class HabitTracker {
         saveButton.addEventListener('click', handleSave);
         cancelButton.addEventListener('click', handleCancel);
         deleteButton.addEventListener('click', handleDelete);
-    }
-
-    createYearGrid(habit) {
-        const grid = document.createElement('div');
-        grid.className = 'year-grid';
-        
-        const today = new Date().toISOString().split('T')[0];
-        const year = new Date().getFullYear();
-        const startDate = new Date(year, 0, 1);
-        
-        // Calculate leap year
-        const isLeapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
-        const totalDays = isLeapYear ? 366 : 365;
-        
-        // Get the number of empty cells for the start of the grid
-        const weekStart = 1; // Monday
-        const firstDayOfWeek = (startDate.getDay() + 6) % 7; // Adjust to start from Monday
-        const emptyCells = (7 + firstDayOfWeek - weekStart) % 7;
-        
-        // Calculate the number of columns (weeks)
-        const totalCells = totalDays + emptyCells;
-        const columns = Math.ceil(totalCells / 7);
-        grid.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
-        
-        // Create empty cells
-        for (let i = 0; i < emptyCells; i++) {
-            const cell = document.createElement('div');
-            cell.className = 'day-cell empty-cell';
-            grid.appendChild(cell);
-        }
-        
-        // Create day cells
-        for (let i = 0; i < totalDays; i++) {
-            const cell = document.createElement('div');
-            cell.className = 'day-cell';
-
-            const currentDate = new Date(startDate);
-            currentDate.setDate(startDate.getDate() + i);
-            
-            const dateStr = currentDate.toISOString().split('T')[0];
-            const [yyyy, mm, dd] = dateStr.split('-');
-            const formattedDate = `${dd}-${mm}-${yyyy}`;
-            cell.setAttribute('data-date', formattedDate);
-            
-            if (habit.dates.includes(dateStr)) {
-                cell.style.backgroundColor = habit.color;
-            }
-            
-            // Only allow clicking if it's today's date
-            if (dateStr === today) {
-                cell.classList.add('today');
-                cell.addEventListener('click', async () => {
-                    const result = await this.ipcRenderer.invoke('toggle-habit-date', {
-                        habitId: habit.id,
-                        date: dateStr
-                    });
-                    
-                    if (result) {
-                        const habitIndex = this.habits.findIndex(h => h.id === habit.id);
-                        if (habitIndex !== -1) {
-                            this.habits[habitIndex] = result;
-                            cell.style.backgroundColor = result.dates.includes(dateStr) ? habit.color : '';
-                        }
-                    }
-                });
-            }
-            
-            grid.appendChild(cell);
-        }
-        
-        return grid;
     }
 }
 

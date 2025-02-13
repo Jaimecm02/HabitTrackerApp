@@ -90,4 +90,14 @@ ipcMain.handle('update-habit', async (event, updatedHabit) => {
     }
 });
 
+ipcMain.handle('save-habits-order', async (event, habits) => {
+    try {
+        saveHabits(habits);
+        return true;
+    } catch (error) {
+        console.error('Error saving habits order:', error);
+        return false;
+    }
+});
+
 module.exports = { HABITS_FILE };

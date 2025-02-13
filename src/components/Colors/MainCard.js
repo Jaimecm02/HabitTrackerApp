@@ -6,7 +6,7 @@ class MainCard {
     }
 
     createMainCard(data) {
-        const { color, secondColor, holographic, gradient, gem, web, chinese, lava, chineseChar, chineseTranslation, rotateCard, randomSeed, scales } = data;
+        const { color, secondColor, holographic, gradient, gem, web, chinese, lava, chineseChar, chineseTranslation, rotateCard, randomSeed, scales, borderType } = data;
         const rgbColor = ColorUtils.hexToRgbString(color);
         const textColor = ColorUtils.calculateContrastColor(color);
 
@@ -17,10 +17,16 @@ class MainCard {
                                     ${chinese ? ' chinese' : ''}
                                     ${lava ? ' lava' : ''}
                                     ${scales ? ' scales' : ''}`;
+
         if (gradient) {
             card.style.background = `linear-gradient(45deg, ${color}, ${secondColor})`;
         } else {
             card.style.backgroundColor = color;
+        }
+
+        if (borderType !== 'none') {
+            console.log(borderType); // Debugging: Check the borderType value
+            card.classList.add(`border-${borderType}`); // Use backticks for template literals
         }
 
         if (gem) {

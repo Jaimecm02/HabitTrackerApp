@@ -8,36 +8,59 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
   <body>
+    <!-- Inline SVG Icons -->
+    <div style="display: none;">
+        <svg xmlns="http://www.w3.org/2000/svg">
+            <symbol id="icon-home" viewBox="0 0 24 24">
+                <!-- Home icon path -->
+            </symbol>
+            <symbol id="icon-habits" viewBox="0 0 24 24">
+                <!-- Habits icon path -->
+            </symbol>
+            <symbol id="icon-analytics" viewBox="0 0 24 24">
+                <!-- Analytics icon path -->
+            </symbol>
+            <symbol id="icon-palette" viewBox="0 0 24 24">
+                <!-- Palette icon path -->
+            </symbol>
+        </svg>
+    </div>
+
+    <!-- Sidebar -->
     <div id="sidebar">
       <ul>
         <li>
-          <a href="#welcomeComponent">
+          <a id="nav-welcome" href="#welcomeComponent" class="active">
             <svg class="nav-icon"><use href="assets/icons.svg#icon-home"/></svg>
           </a>
         </li>
         <li>
-          <a href="#habitComponent">
+          <a id="nav-habits" href="#habitComponent">
             <svg class="nav-icon"><use href="assets/icons.svg#icon-habits"/></svg>
           </a>
         </li>
         <li>
-          <a href="#analyticsComponent">
+          <a id="nav-analytics" href="#analyticsComponent">
             <svg class="nav-icon"><use href="assets/icons.svg#icon-analytics"/></svg>
           </a>
         </li>
         <li>
-          <a href="#colorComponent">
+          <a id="nav-colors" href="#colorComponent">
             <svg class="nav-icon"><use href="assets/icons.svg#icon-palette"/></svg>
           </a>
         </li>
       </ul>
     </div>
+
+    <!-- Content Sections -->
     <div id="content">
       <div id="welcomeComponent"></div>
-      <div id="habitComponent"></div>
-      <div id="analyticsComponent"></div>
-      <div id="colorComponent"></div>
+      <div id="habitComponent" style="display: none;"></div>
+      <div id="analyticsComponent" style="display: none;"></div>
+      <div id="colorComponent" style="display: none;"></div>
     </div>
+
+    <!-- Renderer Script -->
     <script src="renderer.js"></script>
   </body>
 </html>

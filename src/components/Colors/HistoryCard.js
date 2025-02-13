@@ -19,6 +19,10 @@ class HistoryCard {
             historyCard.style.backgroundColor = item.color;
         }
 
+        if (item.borderType !== 'none') {
+            historyCard.classList.add(`border-${item.borderType}`);
+        }
+
         if (item.gem) {
             this.colorComponent.gemPattern.addDelaunayPattern(historyCard, item.randomSeed);
         } else if (item.web) {

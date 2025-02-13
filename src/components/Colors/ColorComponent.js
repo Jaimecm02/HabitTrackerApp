@@ -233,7 +233,21 @@ class ColorComponent {
         const lava = patternRoll >= 0.03 && patternRoll < 0.04; // 1% chance for lava pattern
         const scales = patternRoll >= 0.04 && patternRoll < 0.05; // 1% chance for scales pattern
 
-        return { color, secondColor, holographic, gradient, gem, web, chinese, lava, rotateCard, scales };
+        // Border type probabilities
+        const borderRoll = Math.random();
+        let borderType = 'none'; // Default to classic (no border)
+
+        if (borderRoll < 0.05) { // 5% chance for Silver
+            borderType = 'silver';
+        } else if (borderRoll < 0.08) { // 3% chance for Gold
+            borderType = 'gold';
+        } else if (borderRoll < 0.095) { // 1.5% chance for Platinum
+            borderType = 'platinum';
+        } else if (borderRoll < 0.1) { // 0.5% chance for Rainbow
+            borderType = 'rainbow';
+        }
+
+        return { color, secondColor, holographic, gradient, gem, web, chinese, lava, rotateCard, scales, borderType };
     }
 
     setupComponent() {

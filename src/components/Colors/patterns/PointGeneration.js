@@ -153,9 +153,9 @@ class PointGeneration {
     static generateUniform(width, height, pointCount, seed) {
         const points = [];
         const cellSize = Math.sqrt((width * height) / pointCount);
-        const grid = new Array(Math.ceil(width / cellSize))
+        const grid = Array(Math.ceil(width / cellSize))
             .fill(null)
-            .map(() => new Array(Math.ceil(height / cellSize)).fill(false));
+            .map(() => Array(Math.ceil(height / cellSize)).fill(false));
 
         for (let i = 0; i < pointCount; i++) {
             let attempts = 0;

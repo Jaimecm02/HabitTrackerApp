@@ -30,6 +30,7 @@ class WelcomePage {
         this.updateDate();
         await this.loadTodayHabits();
         this.attachEventListeners();
+        this.addMouseMoveListeners();
     }
 
     getGreeting() {
@@ -45,6 +46,21 @@ class WelcomePage {
         
         newHabitBtn.addEventListener('click', () => this.ipcRenderer.send('open-new-habit'));
         viewStatsBtn.addEventListener('click', () => this.ipcRenderer.send('open-statistics'));
+    }
+
+    addMouseMoveListeners() {
+        const cards = this.container.querySelectorAll(".habit-card");
+        cards.forEach(card => {
+            card.addEventListener("mousemove", this.handleMouseMove.bind(this));
+        });
+    }
+
+    handleMouseMove(e) {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left - rect.width / 2;
+        const mouseY = e.clientY - rect.top - rect.height / 2;
+        const angle = (Math.atan2(mouseY, mouseX) * (180 / Math.PI) + 360) % 360;
+        e.currentTarget.style.setProperty("--start", angle + 60);
     }
 
     updateDate() {
@@ -80,8 +96,10 @@ class WelcomePage {
     createHabitCard(habit, isCompleted) {
         const div = document.createElement('div');
         div.className = 'habit-card';
+        div.style.setProperty('--habit-color', habit.color); // Set the habit color
         div.innerHTML = `
-            <div class="habit-status ${isCompleted ? 'completed' : 'pending'}"></div>
+            <div class="glow"></div>
+            <div class="habit-status ${isCompleted ? 'completed' : 'pending'}" style="background-color: ${isCompleted ? habit.color : '#ccc'}"></div>
             <div class="habit-details">
                 <h3>${habit.name}</h3>
                 <p>${isCompleted ? 'Completed today' : 'Not completed yet'}</p>

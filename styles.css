@@ -1,6 +1,6 @@
-@import './styles/variables.css';
-@import './styles/layout.css';
-@import './styles/habitTracker.css';
-@import './styles/analytics.css';
-@import './styles/colorCards.css';
-@import './styles/welcomepage.css';
+/* This file is used to import all the css files in the project */
+@import './src/styles/layout.css';
+@import './src/components/WelcomePage/welcomepage.css';
+@import './src/components/Habits/habitTracker.css';
+@import './src/components/Analytics/analytics.css';
+@import './src/components/Colors/colorCards.css';
