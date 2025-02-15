@@ -1,0 +1,51 @@
+/* Like Button Styles */
+.like-button {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 20px;
+    height: 20px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateZ(20px);
+    transition: transform 0.2s ease;
+    z-index: 10;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.like-button svg {
+    width: 100%;
+    height: 100%;
+    transition: all 0.3s ease;
+    display: block;
+}
+
+.like-button .heart-path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    transition: fill 0.3s ease, stroke 0.3s ease;
+    vector-effect: non-scaling-stroke;
+}
+
+.like-button:hover {
+    transform: translateZ(20px) scale(1.1);
+}
+
+.like-button.liked .heart-path {
+    fill: #ff4444;
+    stroke: #ff4444;
+}
+
+.color-card:hover .like-button,
+.history-card:hover .like-button {
+    opacity: 1;
+    pointer-events: auto;
+}

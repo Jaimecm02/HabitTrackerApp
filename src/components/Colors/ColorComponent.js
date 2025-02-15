@@ -11,6 +11,7 @@ const { type } = require('os');
 const MainCard = require('./MainCard');
 const HistoryCard = require('./HistoryCard');
 const HeartButton = require('./HeartButton');
+const Roulette = require('./Roulette');
 
 class ColorComponent {
     constructor() {
@@ -259,18 +260,28 @@ class ColorComponent {
         this.container.innerHTML = '';
         this.generateDailyColor().then((data) => {
             const today = new Date().toDateString();
-
+    
             // Save today's color to history with all properties
             this.saveColorToHistory({ ...data, date: today });
-
+    
             // Get updated color history
             this.getColorHistory().then(colorHistory => {
                 const cardIndex = colorHistory.findIndex(item => item.date === today) + 1;
+    
+                // Create and append the white rectangle
+                const roulette = Roulette.createRoulette();
+                this.container.appendChild(roulette);
 
                 // Create main color card
                 const card = this.mainCard.createMainCard({ ...data, cardNumber: cardIndex });
                 this.container.appendChild(card);
+    
+                // Create and append the separator
+                const separator = document.createElement('div');
+                this.container.appendChild(separator);
+                separator.className = 'separator';
 
+    
                 // Add history section
                 this.addHistorySection(colorHistory);
             });
