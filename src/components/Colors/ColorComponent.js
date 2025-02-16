@@ -1,17 +1,17 @@
-const GemPattern = require('./patterns/GemPattern');
-const WebPattern = require('./patterns/WebPattern');
-const ChinesePattern = require('./patterns/ChinesePattern');
-const LavaPattern = require('./patterns/LavaPattern');
-const ScalesPattern = require('./patterns/ScalesPattern');
+const GemPattern = require('./UI/patterns/GemPattern');
+const WebPattern = require('./UI/patterns/WebPattern');
+const ChinesePattern = require('./UI/patterns/ChinesePattern');
+const LavaPattern = require('./UI/patterns/LavaPattern');
+const ScalesPattern = require('./UI/patterns/ScalesPattern');
 const ColorUtils = require('./ColorUtils');
 const fs = require('fs');
 const path = require('path');
 const { type } = require('os');
 
-const MainCard = require('./MainCard');
-const HistoryCard = require('./HistoryCard');
-const HeartButton = require('./HeartButton');
-const Roulette = require('./Roulette');
+const MainCard = require('./UI/MainCard');
+const HistoryCard = require('./UI/HistoryCard');
+const HeartButton = require('./UI/HeartButton');
+const Roulette = require('./UI/Roulette');
 
 class ColorComponent {
     constructor() {
@@ -214,6 +214,7 @@ class ColorComponent {
         });
     }
 
+    // Move out of ColorComponent
     generateRandomColor() {
         const letters = '0123456789ABCDEF';
         let color = '#';
@@ -368,6 +369,7 @@ class ColorComponent {
         });
     }
 
+    // Move out of ColorComponent
     getCardColor(card) {
         const background = card.style.background || card.style.backgroundColor;
         if (background.includes('linear-gradient')) {

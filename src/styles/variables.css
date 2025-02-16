@@ -17,3 +17,8 @@
         rgba(217, 41, 255, 0.5)
     );
 }
+
+@font-face {
+    font-family: "MaShanZheng";
+    src: url('../../assets/MaShanZheng-Regular.ttf');
+}

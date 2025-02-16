@@ -1,9 +1,9 @@
 @import '../../styles/variables.css';
-@import "./patterns/holographic.css";
-@import "./patterns/patterns.css";
-@import "./patterns/special_borders.css";
-@import "./heart-style.css";
-@import "./roulette-style.css";
+@import "./UI/patterns/holographic.css";
+@import "./UI/patterns/patterns.css";
+@import "./UI/patterns/special_borders.css";
+@import "./UI/heart-style.css";
+@import "./UI/roulette-style.css";
 
 /* Color Component Styles */
 #colorComponent {
