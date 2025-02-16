@@ -6,18 +6,41 @@ const ScalesPattern = require('./patterns/ScalesPattern');
 const ColorUtils = require('../ColorUtils');
 
 class Roulette {
-    static createRoulette(dailyColorData) {
+    static createRouletteModal(dailyColorData, onComplete) {
+        const modal = document.createElement('div');
+        modal.className = 'roulette-modal';
+
+        const modalContent = document.createElement('div');
+        modalContent.className = 'roulette-modal-content';
+
         const rouletteContainer = document.createElement('div');
         rouletteContainer.className = 'roulette-container';
 
         // Create and append rectangles with the daily color data
         this.createRectangles(rouletteContainer, dailyColorData);
         
+        const skipButton = document.createElement('button');
+        skipButton.className = 'skip-button';
+        skipButton.textContent = 'Skip';
+        skipButton.addEventListener('click', () => {
+            modal.remove();
+            if (onComplete) onComplete();
+        });
+
+        modalContent.appendChild(rouletteContainer);
+        modalContent.appendChild(skipButton);
+        modal.appendChild(modalContent);
+
         setTimeout(() => {
             this.startAnimation(rouletteContainer);
+            // Auto-close modal after animation
+            // setTimeout(() => {
+            //     modal.remove();
+            //     if (onComplete) onComplete();
+            // }, 10500); // 8.5 seconds (8s animation + 0.5s buffer)
         }, 100);
 
-        return rouletteContainer;
+        return modal;
     }
     
     static applySpecialEffects(rectangle, colorData) {
@@ -44,7 +67,7 @@ class Roulette {
         // Generate a random seed for patterns
         const randomSeed = Math.random();
 
-        // Apply patterns based on the roll, matching MainCard.js implementation
+        // Apply patterns based on the roll
         if (colorData.gem) {
             const gemPattern = new GemPattern();
             gemPattern.addDelaunayPattern(rectangle, randomSeed);

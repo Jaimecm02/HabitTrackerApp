@@ -29,6 +29,7 @@ class ColorComponent {
         this.historyCard = new HistoryCard(this);
         this.heartButton = new HeartButton(this);
         this.initDB();
+        this.lastRouletteDate = localStorage.getItem('lastRouletteDate');
     }
 
     initDB() {
@@ -220,34 +221,54 @@ class ColorComponent {
             return;
         }
         this.container.innerHTML = '';
+        
         this.generateDailyColor().then((data) => {
             const today = new Date().toDateString();
-    
+            
             // Save today's color to history with all properties
             this.saveColorToHistory({ ...data, date: today });
-    
+            
             // Get updated color history
             this.getColorHistory().then(colorHistory => {
                 const cardIndex = colorHistory.findIndex(item => item.date === today) + 1;
-    
-                // Create and append the white rectangle
-                const roulette = Roulette.createRoulette(data);
-                this.container.appendChild(roulette);
-
-                // Create main color card
-                const card = this.mainCard.createMainCard({ ...data, cardNumber: cardIndex });
-                this.container.appendChild(card);
-    
-                // Create and append the separator
-                const separator = document.createElement('div');
-                this.container.appendChild(separator);
-                separator.className = 'separator';
-
-    
-                // Add history section
-                this.addHistorySection(colorHistory);
+                
+                // Check if we should show the roulette today
+                if (this.lastRouletteDate !== today) {
+                    // Create and append the roulette modal
+                    const rouletteModal = Roulette.createRouletteModal(data, () => {
+                        this.showMainContent(data, cardIndex, colorHistory);
+                    });
+                    document.body.appendChild(rouletteModal);
+                    
+                    // Update the last roulette date
+                    localStorage.setItem('lastRouletteDate', today);
+                    this.lastRouletteDate = today;
+                } else {
+                    // Skip roulette and show main content directly
+                    this.showMainContent(data, cardIndex, colorHistory);
+                }
             });
         });
+    }
+
+    showMainContent(data, cardIndex, colorHistory) {
+
+        const mainTitle = document.createElement('h2');
+        mainTitle.textContent = 'TODAY\'S COLOR';
+        mainTitle.className = 'history-title';
+        this.container.appendChild(mainTitle);
+
+        // Create main color card
+        const card = this.mainCard.createMainCard({ ...data, cardNumber: cardIndex });
+        this.container.appendChild(card);
+
+        // Create and append the separator
+        const separator = document.createElement('div');
+        separator.className = 'separator';
+        this.container.appendChild(separator);
+
+        // Add history section
+        this.addHistorySection(colorHistory);
     }
 
     addHistorySection(colorHistory) {
