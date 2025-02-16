@@ -270,7 +270,7 @@ class ColorComponent {
                 const cardIndex = colorHistory.findIndex(item => item.date === today) + 1;
     
                 // Create and append the white rectangle
-                const roulette = Roulette.createRoulette();
+                const roulette = Roulette.createRoulette(data);
                 this.container.appendChild(roulette);
 
                 // Create main color card

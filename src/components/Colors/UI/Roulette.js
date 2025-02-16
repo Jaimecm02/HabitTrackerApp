@@ -5,12 +5,12 @@ const LavaPattern = require('./patterns/LavaPattern');
 const ScalesPattern = require('./patterns/ScalesPattern');
 
 class Roulette {
-    static createRoulette() {
+    static createRoulette(dailyColorData) {
         const rouletteContainer = document.createElement('div');
         rouletteContainer.className = 'roulette-container';
 
-        // Create and append rectangles
-        this.createRectangles(rouletteContainer);
+        // Create and append rectangles with the daily color data
+        this.createRectangles(rouletteContainer, dailyColorData);
         
         setTimeout(() => {
             this.startAnimation(rouletteContainer);
@@ -116,7 +116,7 @@ class Roulette {
         }
     }
     
-    static createRectangles(container) {
+    static createRectangles(container, dailyColorData) {
         const numberOfRectangles = 80;
         const targetIndex = Math.floor(numberOfRectangles * 0.85);
     
@@ -125,7 +125,8 @@ class Roulette {
             rectangle.className = 'roulette-rectangle';
             
             if (i === targetIndex) {
-                rectangle.style.backgroundColor = '#FFFFFF';
+                // Use the daily color data for the target card
+                this.applySpecialEffects(rectangle, dailyColorData);
                 rectangle.classList.add('target-card');
                 rectangle.dataset.index = i;
             } else {
