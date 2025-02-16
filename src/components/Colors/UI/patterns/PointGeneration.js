@@ -10,7 +10,7 @@ class PointGeneration {
         
         // Select distribution type
         const distributionRand = this.seededRandom(seed + 2);
-        const distributions = ['goldenSpiral', 'clustered', 'uniform'];
+        const distributions = ['goldenSpiral', 'clustered'];
         const distribution = distributions[Math.floor(distributionRand * distributions.length)];
 
         return {

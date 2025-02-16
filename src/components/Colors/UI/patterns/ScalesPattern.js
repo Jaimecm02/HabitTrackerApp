@@ -4,7 +4,7 @@ class ScalesPattern {
         const points = [];
 
         // Grid parameters
-        const dx = 45; // Horizontal spacing between circles
+        const dx = width/8; // Horizontal spacing between circles
         const dy = (dx * Math.sqrt(3)) / 7; // Vertical spacing between circles
         const radius = dx / 2; // Radius of each circle
 

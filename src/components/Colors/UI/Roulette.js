@@ -3,6 +3,7 @@ const GemPattern = require('./patterns/GemPattern');
 const WebPattern = require('./patterns/WebPattern');
 const LavaPattern = require('./patterns/LavaPattern');
 const ScalesPattern = require('./patterns/ScalesPattern');
+const ColorUtils = require('../ColorUtils');
 
 class Roulette {
     static createRoulette(dailyColorData) {
@@ -17,54 +18,6 @@ class Roulette {
         }, 100);
 
         return rouletteContainer;
-    }
-
-    static getRandomColor() {
-        const letters = '0123456789ABCDEF';
-        let color = '#';
-        let secondColor = '#';
-        for (let i = 0; i < 6; i++) {
-            color += letters[Math.floor(Math.random() * 16)];
-            secondColor += letters[Math.floor(Math.random() * 16)];
-        }
-        
-        // Match probabilities from ColorComponent
-        const holographic = Math.random() < 0.035;
-        const gradient = Math.random() < 0.065;
-        const rotateCard = Math.random() < 0.01;
-
-        const patternRoll = Math.random();
-        const gem = patternRoll < 0.01;
-        const web = patternRoll >= 0.01 && patternRoll < 0.02;
-        const chinese = patternRoll >= 0.02 && patternRoll < 0.03;
-        const lava = patternRoll >= 0.03 && patternRoll < 0.04;
-        const scales = patternRoll >= 0.04 && patternRoll < 0.05;
-
-        const borderRoll = Math.random();
-        let borderType = 'none';
-        if (borderRoll < 0.05) {
-            borderType = 'silver';
-        } else if (borderRoll < 0.08) {
-            borderType = 'gold';
-        } else if (borderRoll < 0.095) {
-            borderType = 'platinum';
-        } else if (borderRoll < 0.1) {
-            borderType = 'rainbow';
-        }
-
-        return { 
-            color, 
-            secondColor, 
-            holographic, 
-            gradient, 
-            gem, 
-            web, 
-            chinese, 
-            lava, 
-            rotateCard, 
-            scales, 
-            borderType 
-        };
     }
     
     static applySpecialEffects(rectangle, colorData) {
@@ -130,7 +83,7 @@ class Roulette {
                 rectangle.classList.add('target-card');
                 rectangle.dataset.index = i;
             } else {
-                const colorData = this.getRandomColor();
+                const colorData = ColorUtils.generateRandomColor();
                 this.applySpecialEffects(rectangle, colorData);
             }
             

@@ -172,7 +172,7 @@ class ColorComponent {
                 }
 
                 // Only generate new color if there's no existing entry
-                const { color, secondColor, holographic, gradient, gem, web, chinese, lava, rotateCard, scales, borderType } = this.generateRandomColor();
+                const { color, secondColor, holographic, gradient, gem, web, chinese, lava, rotateCard, scales, borderType } = ColorUtils.generateRandomColor();
                 let chineseChar = null;
                 let chineseTranslation = null;
                 
@@ -212,45 +212,6 @@ class ColorComponent {
                 reject(event.target.error);
             };
         });
-    }
-
-    // Move out of ColorComponent
-    generateRandomColor() {
-        const letters = '0123456789ABCDEF';
-        let color = '#';
-        let secondColor = '#';
-        for (let i = 0; i < 6; i++) {
-            color += letters[Math.floor(Math.random() * 16)];
-            secondColor += letters[Math.floor(Math.random() * 16)];
-        }
-
-        const holographic = Math.random() < 0.035; // 3.5% chance of holographic color (one every 30 days)
-        const gradient = Math.random() < 0.065; // 6.5% chance of gradient color (two every 30 days)
-    
-        const rotateCard = Math.random() < 0.01; // 1% chance of rotated card
-
-        const patternRoll = Math.random();
-        const gem = patternRoll < 0.01; // 1% chance for gem pattern
-        const web = patternRoll >= 0.01 && patternRoll < 0.02; // 1% chance for web pattern
-        const chinese = patternRoll >= 0.02 && patternRoll < 0.03; // 1% chance for Chinese character
-        const lava = patternRoll >= 0.03 && patternRoll < 0.04; // 1% chance for lava pattern
-        const scales = patternRoll >= 0.04 && patternRoll < 0.05; // 1% chance for scales pattern
-
-        // Border type probabilities
-        const borderRoll = Math.random();
-        let borderType = 'none'; // Default to classic (no border)
-
-        if (borderRoll < 0.05) { // 5% chance for Silver
-            borderType = 'silver';
-        } else if (borderRoll < 0.08) { // 3% chance for Gold
-            borderType = 'gold';
-        } else if (borderRoll < 0.095) { // 1.5% chance for Platinum
-            borderType = 'platinum';
-        } else if (borderRoll < 0.1) { // 0.5% chance for Rainbow
-            borderType = 'rainbow';
-        }
-
-        return { color, secondColor, holographic, gradient, gem, web, chinese, lava, rotateCard, scales, borderType };
     }
 
     setupComponent() {
@@ -367,15 +328,6 @@ class ColorComponent {
             
             request.onerror = () => resolve(false);
         });
-    }
-
-    // Move out of ColorComponent
-    getCardColor(card) {
-        const background = card.style.background || card.style.backgroundColor;
-        if (background.includes('linear-gradient')) {
-            return background.match(/#[a-fA-F0-9]{6}/g)[0];
-        }
-        return background;
     }
 
 }
