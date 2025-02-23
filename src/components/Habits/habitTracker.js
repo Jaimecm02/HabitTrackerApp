@@ -162,64 +162,7 @@ class HabitTracker {
 
         habitDiv.appendChild(yearGrid);
 
-        // Add drag-and-drop event listeners
-        habitDiv.addEventListener('dragstart', this.handleDragStart.bind(this));
-        habitDiv.addEventListener('dragover', this.handleDragOver.bind(this));
-        habitDiv.addEventListener('drop', this.handleDrop.bind(this));
-
         return habitDiv;
-    }
-
-    handleDragStart(event) {
-        // Store the ID of the habit being dragged
-        event.dataTransfer.setData('text/plain', event.target.dataset.habitId);
-        event.target.classList.add('dragging'); // Add a class for visual feedback
-    }
-
-    handleDragOver(event) {
-        event.preventDefault();
-        if (this.debounceTimeout) clearTimeout(this.debounceTimeout);
-    
-        this.debounceTimeout = setTimeout(() => {
-            const draggingElement = this.container.querySelector('.dragging');
-            const overElement = event.target.closest('.habit-item');
-    
-            if (overElement && draggingElement !== overElement) {
-                const rect = overElement.getBoundingClientRect();
-                const offset = event.clientY - rect.top;
-    
-                // Only move the element if it crosses the midpoint
-                if (offset < rect.height / 2) {
-                    this.container.querySelector('.habits-list').insertBefore(draggingElement, overElement);
-                } else {
-                    this.container.querySelector('.habits-list').insertBefore(draggingElement, overElement.nextSibling);
-                }
-            }
-        }, 1); // Adjust the debounce time as needed
-    }
-
-    handleDrop(event) {
-        event.preventDefault();
-        const draggedHabitId = event.dataTransfer.getData('text/plain');
-        const draggedElement = this.container.querySelector('.dragging');
-        draggedElement.classList.remove('dragging');
-    
-        // Get the new order of habits based on the DOM
-        const newOrder = Array.from(this.container.querySelectorAll('.habit-item')).map(el => el.dataset.habitId);
-    
-        // Update the habits array based on the new order
-        this.habits.sort((a, b) => newOrder.indexOf(a.id.toString()) - newOrder.indexOf(b.id.toString()));
-    
-        // Optionally, you can save the new order to the backend if needed
-        this.saveHabitsOrder();
-    }
-    
-    async saveHabitsOrder() {
-        try {
-            await this.ipcRenderer.invoke('save-habits-order', this.habits);
-        } catch (error) {
-            console.error('Error saving habits order:', error);
-        }
     }
 
     showEditModal(habit) {
