@@ -4,23 +4,29 @@ function calculateStreak(dates) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    const sortedDates = [...dates].sort((a, b) => new Date(b) - new Date(a));
+    const sortedDates = [...dates].sort((a, b) => {
+        const dateA = new Date(a + 'T00:00:00'); // Add time component to ensure local date
+        const dateB = new Date(b + 'T00:00:00');
+        return dateB - dateA;
+    });
+    
     let streak = 0;
     let currentDate = today;
-
+    
     for (const date of sortedDates) {
-        const habitDate = new Date(date);
+        const habitDate = new Date(date + 'T00:00:00');
         habitDate.setHours(0, 0, 0, 0);
-
-        // Break streak if we miss a day
-        if ((currentDate - habitDate) / (1000 * 60 * 60 * 24) > 1) {
+        
+        const daysDifference = Math.floor((currentDate - habitDate) / (1000 * 60 * 60 * 24));
+        
+        if (daysDifference > 1) {
             break;
         }
-
+        
         streak++;
         currentDate = habitDate;
     }
-
+    
     return streak;
 }
 
@@ -33,61 +39,74 @@ function getStreakLevel(streak) {
     return '';
 }
 
-function createYearGrid(habit) {
+function formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function createYearGrid(habit, year) {
     const grid = document.createElement('div');
     grid.className = 'year-grid';
     
-    const today = new Date().toISOString().split('T')[0];
-    const year = new Date().getFullYear();
-    const startDate = new Date(year, 0, 1);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayStr = formatDate(today);
     
-    // Calculate leap year
+    const startDate = new Date(year, 0, 1);
+    startDate.setHours(0, 0, 0, 0);
+    
     const isLeapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
     const totalDays = isLeapYear ? 366 : 365;
     
-    // Get the number of empty cells for the start of the grid
-    const weekStart = 1; // Monday
-    const firstDayOfWeek = (startDate.getDay() + 6) % 7; // Adjust to start from Monday
-    const emptyCells = (7 + firstDayOfWeek - weekStart) % 7;
+    const firstDayOfWeek = (startDate.getDay() + 6) % 7;
+    const emptyCells = firstDayOfWeek;
     
-    // Calculate the number of columns (weeks)
     const totalCells = totalDays + emptyCells;
     const columns = Math.ceil(totalCells / 7);
     grid.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
     
-    // Create empty cells
     for (let i = 0; i < emptyCells; i++) {
         const cell = document.createElement('div');
         cell.className = 'day-cell empty-cell';
         grid.appendChild(cell);
     }
     
-    // Create day cells
     for (let i = 0; i < totalDays; i++) {
         const cell = document.createElement('div');
         cell.className = 'day-cell';
-
+    
         const currentDate = new Date(startDate);
         currentDate.setDate(startDate.getDate() + i);
+        currentDate.setHours(0, 0, 0, 0);
+    
+        const dateStr = formatDate(currentDate);
         
-        const dateStr = currentDate.toISOString().split('T')[0];
-        const [yyyy, mm, dd] = dateStr.split('-');
-        const formattedDate = `${dd}-${mm}-${yyyy}`;
-        cell.setAttribute('data-date', formattedDate);
-        
+        cell.setAttribute('data-date', dateStr);
+    
+        const dayNumber = document.createElement('span');
+        dayNumber.textContent = currentDate.getDate();
+        dayNumber.style.fontSize = '8px';
+        dayNumber.style.position = 'absolute';
+        dayNumber.style.top = '2px';
+        dayNumber.style.left = '2px';
+        dayNumber.style.color = 'rgba(255, 255, 255, 0.5)';
+        cell.appendChild(dayNumber);
+    
         if (habit.dates.includes(dateStr)) {
             cell.style.backgroundColor = habit.color;
         }
-        
-        // Only allow clicking if it's today's date
-        if (dateStr === today) {
+    
+        if (dateStr === todayStr) {
             cell.classList.add('today');
             cell.addEventListener('click', async () => {
                 const result = await this.ipcRenderer.invoke('toggle-habit-date', {
                     habitId: habit.id,
-                    date: dateStr
+                    date: dateStr,
+                    cellNumber: i + 1
                 });
-                
+    
                 if (result) {
                     const habitIndex = this.habits.findIndex(h => h.id === habit.id);
                     if (habitIndex !== -1) {
@@ -97,7 +116,7 @@ function createYearGrid(habit) {
                 }
             });
         }
-        
+    
         grid.appendChild(cell);
     }
     

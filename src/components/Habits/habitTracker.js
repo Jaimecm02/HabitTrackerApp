@@ -21,6 +21,10 @@ class HabitTracker {
                     <input type="color" id="habitColor" value="#3498db">
                     <button id="addHabit">Add Habit</button>
                 </div>
+                <div class="year-selector">
+                    <label for="yearSelect">Select Year:</label>
+                    <select id="yearSelect"></select>
+                </div>
                 <div class="habits-list"></div>
             </div>
             <div id="editHabitModal" class="modal">
@@ -35,9 +39,10 @@ class HabitTracker {
                 </div>
             </div>
         `;
-
+    
         await this.bindEvents();
         await this.loadHabits();
+        this.populateYearSelector();
         console.log('HabitTracker initialization complete');
     }
 
@@ -98,26 +103,63 @@ class HabitTracker {
         }
     }
 
-    renderHabits() {
+    populateYearSelector() {
+        const yearSelect = this.container.querySelector('#yearSelect');
+        if (!yearSelect) return;
+    
+        const currentYear = new Date().getFullYear();
+        const startYear = currentYear - 3; 
+        const endYear = currentYear + 3; 
+    
+        for (let year = startYear; year <= endYear; year++) {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            if (year === currentYear) {
+                option.selected = true;
+            }
+            yearSelect.appendChild(option);
+        }
+    
+        yearSelect.addEventListener('change', () => {
+            const selectedYear = parseInt(yearSelect.value);
+            this.renderHabits(selectedYear);
+        });
+    }
+
+    renderHabits(year = new Date().getFullYear()) {
         const habitsList = this.container.querySelector('.habits-list');
         if (!habitsList) return;
         
         habitsList.innerHTML = '';
         console.log('Rendering habits:', this.habits); // Debug line
-
+    
         this.habits.forEach(habit => {
-            const habitElement = this.createHabitElement(habit);
+            const habitElement = this.createHabitElement(habit, year);
             habitsList.appendChild(habitElement);
         });
     }
 
-    createHabitElement(habit) {
+    hexToRgb(hex) {
+        // Remove the hash at the start if it's there
+        hex = hex.replace(/^#/, '');
+        
+        // Parse the hex color into RGB components
+        const bigint = parseInt(hex, 16);
+        const r = (bigint >> 16) & 255;
+        const g = (bigint >> 8) & 255;
+        const b = bigint & 255;
+        
+        return `${r}, ${g}, ${b}`;
+    }
+
+    createHabitElement(habit, year) {
         const habitDiv = document.createElement('div');
         habitDiv.className = 'habit-item';
-        habitDiv.draggable = true; // Make the habit card draggable
         habitDiv.dataset.habitId = habit.id; // Store the habit ID for reference
+        habitDiv.style.borderColor = `rgba(${this.hexToRgb(habit.color)}, 0.3)`;
 
-        const yearGrid = createYearGrid(habit);
+        const yearGrid = createYearGrid(habit, year); // Pass the selected year
         const currentStreak = calculateStreak(habit.dates);
         const streakLevel = getStreakLevel(currentStreak);
         
@@ -136,12 +178,28 @@ class HabitTracker {
                     </button>
                 </div>
             </div>
+            <div class="grid-container">
+                <!-- Year grid will be appended here -->
+            </div>
         `;
+        
+        // Get the grid container and append the year grid to it
+        const gridContainer = habitDiv.querySelector('.grid-container');
+        gridContainer.appendChild(yearGrid);
         
         // Add click handler for complete today button
         const completeButton = habitDiv.querySelector('.complete-today-btn');
+        const today = new Date().toISOString().split('T')[0];
+        
+        // Set initial completed state
+        if (habit.dates.includes(today)) {
+            completeButton.classList.add('completed');
+            completeButton.textContent = 'Completed';
+        } else {
+            completeButton.textContent = 'Complete Today';
+        }
+        
         completeButton.addEventListener('click', async () => {
-            const today = new Date().toISOString().split('T')[0];
             const result = await this.ipcRenderer.invoke('toggle-habit-date', {
                 habitId: habit.id,
                 date: today
@@ -151,17 +209,29 @@ class HabitTracker {
                 const habitIndex = this.habits.findIndex(h => h.id === habit.id);
                 if (habitIndex !== -1) {
                     this.habits[habitIndex] = result;
-                    this.renderHabits();
+                    
+                    // Update button state without full re-render
+                    if (result.dates.includes(today)) {
+                        completeButton.classList.add('completed');
+                        completeButton.textContent = 'Completed';
+                    } else {
+                        completeButton.classList.remove('completed');
+                        completeButton.textContent = 'Complete Today';
+                    }
+                    
+                    // Update only the specific day cell
+                    const todayCell = habitDiv.querySelector(`.day-cell[data-date="${today}"]`);
+                    if (todayCell) {
+                        todayCell.style.backgroundColor = result.dates.includes(today) ? habit.color : '';
+                    }
                 }
             }
         });
-
+    
         // Add edit button handler
         const editButton = habitDiv.querySelector('.edit-habit-btn');
         editButton.addEventListener('click', () => this.showEditModal(habit));
-
-        habitDiv.appendChild(yearGrid);
-
+    
         return habitDiv;
     }
 
