@@ -256,6 +256,7 @@ class HabitTracker {
             const decrementButton = habitDiv.querySelector('#decrement');
             const incrementButton = habitDiv.querySelector('#increment');
     
+            // Initialize the counter with the current repetitions for today
             counterValue.textContent = habit.repetitions[today] || 0;
     
             decrementButton.addEventListener('click', async () => {
@@ -268,6 +269,12 @@ class HabitTracker {
                         date: today,
                         repetitions: newValue
                     });
+    
+                    // Update the habit in the local state
+                    const habitIndex = this.habits.findIndex(h => h.id === habit.id);
+                    if (habitIndex !== -1) {
+                        this.habits[habitIndex].repetitions[today] = newValue;
+                    }
                 }
             });
     
@@ -280,6 +287,12 @@ class HabitTracker {
                     date: today,
                     repetitions: newValue
                 });
+    
+                // Update the habit in the local state
+                const habitIndex = this.habits.findIndex(h => h.id === habit.id);
+                if (habitIndex !== -1) {
+                    this.habits[habitIndex].repetitions[today] = newValue;
+                }
             });
         } else {
             const completeButton = habitDiv.querySelector('.complete-today-btn');

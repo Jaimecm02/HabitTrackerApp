@@ -73,6 +73,16 @@ function createYearGrid(habit, year) {
         grid.appendChild(cell);
     }
     
+    // Calculate the maximum number of repetitions for the habit
+    let maxRepetitions = 1;
+    if (habit.multipleCompletions && habit.repetitions) {
+        const reps = Object.values(habit.repetitions);
+        if (reps.length > 0) {
+            const max = Math.max(...reps);
+            maxRepetitions = max > 0 ? max : 1;
+        }
+    }
+    
     for (let i = 0; i < totalDays; i++) {
         const cell = document.createElement('div');
         cell.className = 'day-cell';
@@ -94,32 +104,23 @@ function createYearGrid(habit, year) {
         dayNumber.style.color = 'rgba(255, 255, 255, 0.5)';
         cell.appendChild(dayNumber);
     
-        if (habit.dates.includes(dateStr)) {
-            if (habit.multipleCompletions && habit.repetitions[dateStr]) {
-                const maxReps = Math.max(...Object.values(habit.repetitions));
-                const opacity = habit.repetitions[dateStr] / maxReps;
+        // Handle cell coloring based on habit type
+        if (habit.multipleCompletions) {
+            // Check repetitions for multiple completions
+            const rep = habit.repetitions ? habit.repetitions[dateStr] : 0;
+            if (rep > 0) {
+                const opacity = rep / maxRepetitions;
                 cell.style.backgroundColor = `rgba(${hexToRgb(habit.color)}, ${opacity})`;
-            } else {
+            }
+        } else {
+            // Check dates array for non-multiple completions
+            if (habit.dates.includes(dateStr)) {
                 cell.style.backgroundColor = habit.color;
             }
         }
     
         if (dateStr === todayStr) {
             cell.classList.add('today');
-            cell.addEventListener('click', async () => {
-                const result = await ipcRenderer.invoke('toggle-habit-date', {
-                    habitId: habit.id,
-                    date: dateStr
-                });
-    
-                if (result) {
-                    const habitIndex = this.habits.findIndex(h => h.id === habit.id);
-                    if (habitIndex !== -1) {
-                        this.habits[habitIndex] = result;
-                        cell.style.backgroundColor = result.dates.includes(dateStr) ? habit.color : '';
-                    }
-                }
-            });
         }
     
         grid.appendChild(cell);
