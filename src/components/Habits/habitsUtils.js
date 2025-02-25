@@ -95,7 +95,13 @@ function createYearGrid(habit, year) {
         cell.appendChild(dayNumber);
     
         if (habit.dates.includes(dateStr)) {
-            cell.style.backgroundColor = habit.color;
+            if (habit.multipleCompletions && habit.repetitions[dateStr]) {
+                const maxReps = Math.max(...Object.values(habit.repetitions));
+                const opacity = habit.repetitions[dateStr] / maxReps;
+                cell.style.backgroundColor = `rgba(${hexToRgb(habit.color)}, ${opacity})`;
+            } else {
+                cell.style.backgroundColor = habit.color;
+            }
         }
     
         if (dateStr === todayStr) {
@@ -120,6 +126,15 @@ function createYearGrid(habit, year) {
     }
     
     return grid;
+}
+
+function hexToRgb(hex) {
+    hex = hex.replace(/^#/, '');
+    const bigint = parseInt(hex, 16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+    return `${r}, ${g}, ${b}`;
 }
 
 module.exports = {

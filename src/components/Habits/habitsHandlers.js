@@ -32,6 +32,7 @@ ipcMain.handle('add-habit', async (event, habit) => {
     console.log('add-habit handler called with:', habit);
     try {
         const habits = loadHabits();
+        habit.repetitions = habit.multipleCompletions ? {} : null; // Initialize repetitions if multiple completions are enabled
         habits.push(habit);
         saveHabits(habits);
         event.sender.send('habits-updated');
@@ -40,6 +41,19 @@ ipcMain.handle('add-habit', async (event, habit) => {
         console.error('Error in add-habit handler:', error);
         throw error;
     }
+});
+
+ipcMain.handle('update-habit-repetition', async (event, { habitId, date, repetitions }) => {
+    console.log('update-habit-repetition handler called:', { habitId, date, repetitions });
+    const habits = loadHabits();
+    const habit = habits.find(h => h.id === habitId);
+    if (habit && habit.multipleCompletions) {
+        habit.repetitions[date] = repetitions;
+        saveHabits(habits);
+        event.sender.send('habits-updated');
+        return habit;
+    }
+    return null;
 });
 
 ipcMain.handle('toggle-habit-date', async (event, { habitId, date }) => {

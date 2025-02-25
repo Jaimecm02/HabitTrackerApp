@@ -38,6 +38,11 @@ class HabitTracker {
                         <label for="habitColor">Color</label>
                         <input type="color" id="habitColor" value="#3498db">
                     </div>
+                    <div class="form-group">
+                        <label for="multipleCompletions">
+                            <input type="checkbox" id="multipleCompletions"> Track multiple completions (e.g., reps)
+                        </label>
+                    </div>
                     <div class="modal-buttons">
                         <button id="saveNewHabit">Create</button>
                         <button id="cancelNewHabit">Cancel</button>
@@ -120,6 +125,7 @@ class HabitTracker {
         const modal = this.container.querySelector('#newHabitModal');
         const nameInput = modal.querySelector('#habitName');
         const colorInput = modal.querySelector('#habitColor');
+        const multipleCompletionsCheckbox = modal.querySelector('#multipleCompletions');
         
         if (!nameInput.value.trim()) {
             return;
@@ -129,9 +135,11 @@ class HabitTracker {
             id: Date.now(),
             name: nameInput.value.trim(),
             color: colorInput.value,
-            dates: []
+            dates: [],
+            multipleCompletions: multipleCompletionsCheckbox.checked, // Add this field
+            repetitions: multipleCompletionsCheckbox.checked ? {} : null // Initialize repetitions if enabled
         };
-
+    
         try {
             console.log('Attempting to invoke add-habit'); // Debug line
             const addedHabit = await this.ipcRenderer.invoke('add-habit', habit);
@@ -144,6 +152,7 @@ class HabitTracker {
                 // Reset and close the modal
                 nameInput.value = '';
                 colorInput.value = '#3498db';
+                multipleCompletionsCheckbox.checked = false; // Reset the checkbox
                 modal.classList.remove('active');
             }
         } catch (error) {
@@ -204,10 +213,10 @@ class HabitTracker {
     createHabitElement(habit, year) {
         const habitDiv = document.createElement('div');
         habitDiv.className = 'habit-item';
-        habitDiv.dataset.habitId = habit.id; // Store the habit ID for reference
+        habitDiv.dataset.habitId = habit.id;
         habitDiv.style.borderColor = `rgba(${this.hexToRgb(habit.color)}, 0.1)`;
-
-        const yearGrid = createYearGrid(habit, year); // Pass the selected year
+    
+        const yearGrid = createYearGrid(habit, year);
         const currentStreak = calculateStreak(habit.dates);
         const streakLevel = getStreakLevel(currentStreak);
         
@@ -219,10 +228,17 @@ class HabitTracker {
                     <span class="streak-count ${streakLevel}">${currentStreak} day${currentStreak !== 1 ? 's' : ''}</span>
                 </div>
                 <div class="habit-buttons">
-                    <button class="complete-today-btn">Complete Today</button>
+                    ${habit.multipleCompletions ? `
+                        <div class="counter">
+                            <button class="counter-btn" id="decrement">-</button>
+                            <span class="counter-value">0</span>
+                            <button class="counter-btn" id="increment">+</button>
+                        </div>
+                    ` : `
+                        <button class="complete-today-btn">Complete Today</button>
+                    `}
                     <button class="edit-habit-btn">
                         <svg width="16" height="16"><use href="#icon-pencil"/></svg>
-                        Edit
                     </button>
                 </div>
             </div>
@@ -231,55 +247,82 @@ class HabitTracker {
             </div>
         `;
         
-        // Get the grid container and append the year grid to it
         const gridContainer = habitDiv.querySelector('.grid-container');
         gridContainer.appendChild(yearGrid);
         
-        // Add click handler for complete today button
-        const completeButton = habitDiv.querySelector('.complete-today-btn');
-        const today = new Date().toISOString().split('T')[0];
-        
-        // Set initial completed state
-        if (habit.dates.includes(today)) {
-            completeButton.classList.add('completed');
-            completeButton.textContent = 'Completed';
-        } else {
-            completeButton.textContent = 'Complete Today';
-        }
-        
-        completeButton.addEventListener('click', async () => {
-            const result = await this.ipcRenderer.invoke('toggle-habit-date', {
-                habitId: habit.id,
-                date: today
+        if (habit.multipleCompletions) {
+            const today = new Date().toISOString().split('T')[0];
+            const counterValue = habitDiv.querySelector('.counter-value');
+            const decrementButton = habitDiv.querySelector('#decrement');
+            const incrementButton = habitDiv.querySelector('#increment');
+    
+            counterValue.textContent = habit.repetitions[today] || 0;
+    
+            decrementButton.addEventListener('click', async () => {
+                const currentValue = parseInt(counterValue.textContent);
+                if (currentValue > 0) {
+                    const newValue = currentValue - 1;
+                    counterValue.textContent = newValue;
+                    await this.ipcRenderer.invoke('update-habit-repetition', {
+                        habitId: habit.id,
+                        date: today,
+                        repetitions: newValue
+                    });
+                }
             });
+    
+            incrementButton.addEventListener('click', async () => {
+                const currentValue = parseInt(counterValue.textContent);
+                const newValue = currentValue + 1;
+                counterValue.textContent = newValue;
+                await this.ipcRenderer.invoke('update-habit-repetition', {
+                    habitId: habit.id,
+                    date: today,
+                    repetitions: newValue
+                });
+            });
+        } else {
+            const completeButton = habitDiv.querySelector('.complete-today-btn');
+            const today = new Date().toISOString().split('T')[0];
             
-            if (result) {
-                const habitIndex = this.habits.findIndex(h => h.id === habit.id);
-                if (habitIndex !== -1) {
-                    this.habits[habitIndex] = result;
-                    
-                    // Update button state without full re-render
-                    if (result.dates.includes(today)) {
-                        completeButton.classList.add('completed');
-                        completeButton.textContent = 'Completed';
-                    } else {
-                        completeButton.classList.remove('completed');
-                        completeButton.textContent = 'Complete Today';
-                    }
-                    
-                    // Update only the specific day cell
-                    const todayCell = habitDiv.querySelector(`.day-cell[data-date="${today}"]`);
-                    if (todayCell) {
-                        todayCell.style.backgroundColor = result.dates.includes(today) ? habit.color : '';
+            if (habit.dates.includes(today)) {
+                completeButton.classList.add('completed');
+                completeButton.textContent = 'Completed';
+            } else {
+                completeButton.textContent = 'Complete Today';
+            }
+            
+            completeButton.addEventListener('click', async () => {
+                const result = await this.ipcRenderer.invoke('toggle-habit-date', {
+                    habitId: habit.id,
+                    date: today
+                });
+                
+                if (result) {
+                    const habitIndex = this.habits.findIndex(h => h.id === habit.id);
+                    if (habitIndex !== -1) {
+                        this.habits[habitIndex] = result;
+                        
+                        if (result.dates.includes(today)) {
+                            completeButton.classList.add('completed');
+                            completeButton.textContent = 'Completed';
+                        } else {
+                            completeButton.classList.remove('completed');
+                            completeButton.textContent = 'Complete Today';
+                        }
+                        
+                        const todayCell = habitDiv.querySelector(`.day-cell[data-date="${today}"]`);
+                        if (todayCell) {
+                            todayCell.style.backgroundColor = result.dates.includes(today) ? habit.color : '';
+                        }
                     }
                 }
-            }
-        });
-    
-        // Add edit button handler
+            });
+        }
+        
         const editButton = habitDiv.querySelector('.edit-habit-btn');
         editButton.addEventListener('click', () => this.showEditModal(habit));
-    
+        
         return habitDiv;
     }
 

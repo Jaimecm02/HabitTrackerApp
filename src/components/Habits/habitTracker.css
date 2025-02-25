@@ -141,28 +141,32 @@ h1, h2 {
 }
 
 .edit-habit-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 0.5rem 1rem;
-    background: #3498db;
-    color: white;
+    background: transparent;
     border: none;
     cursor: pointer;
-    font-size: 0.9rem;
-    transition: all 0.2s ease;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 4px;
+    transition: all 0.2s ease;
+    width: 32px;
+    height: 32px;
+}
+
+.edit-habit-btn:hover {
+    border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 .edit-habit-btn svg {
     width: 16px;
     height: 16px;
-    margin-right: 4px;
+    fill: var(--text-color);
+    transition: fill 0.2s ease;
 }
 
-.edit-habit-btn:hover {
-    background: #2980b9;
-    transform: translateY(-1px);
+.edit-habit-btn:hover svg {
+    fill: #3498db; /* Change icon color on hover */
 }
 
 .complete-today-btn {
@@ -186,12 +190,10 @@ h1, h2 {
 .complete-today-btn:hover {
     background: var(--success-color);
     color: white;
-    transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .complete-today-btn:active {
-    transform: translateY(0);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
@@ -426,4 +428,34 @@ h1, h2 {
         opacity: 1;
         transform: translate(-50%, -50%);
     }
+}
+
+.counter {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.counter-btn {
+    background: transparent;
+    color: var(--text-color);
+    border: 1px solid var(--text-color);
+    border-radius: 4px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.counter-btn:hover {
+    background: var(--text-color);
+    color: white;
+}
+
+.counter-value {
+    font-size: 1rem;
+    color: var(--text-color);
 }
