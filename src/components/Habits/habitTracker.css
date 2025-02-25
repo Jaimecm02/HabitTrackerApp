@@ -6,48 +6,68 @@ h1, h2 {
     font-size: 2rem;
     margin-bottom: 2rem;
     text-align: center;
+    padding: 0 1rem;
 }
 
-.habit-form {
+.habit-tracker-header {
+    position: relative; /* Make the header a positioning context */
     display: flex;
+    justify-content: center; /* Center the title */
+    align-items: center; /* Vertically center the title */
+    padding: 0 1rem; /* Add some padding to the sides */
+    margin-bottom: 2rem; /* Adjust margin as needed */
+}
+
+.habit-tracker-title {
+    margin: 0; /* Remove default margin */
+    text-align: center; /* Ensure the title text is centered */
+}
+
+.add-habit-btn {
+    background: transparent;
+    color: var(--text-color);
+    border: 1px solid #3498db;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: absolute; /* Position the button absolutely */
+    right: 1rem; /* Place the button on the right side */
+}
+
+.add-habit-btn:hover {
+    background: #3498db;
+    color: white;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.year-selector {
+    display: flex;
+    align-items: center;
     gap: 1rem;
     margin-bottom: 2rem;
-    align-items: center;
     justify-content: center;
 }
 
-.habit-form input[type="text"], .habit-form input[type="color"], .habit-form button {
-    border-radius: 4px;
+.year-selector label {
+    color: var(--text-color);
+    font-size: 1rem;
 }
 
-.habit-form input[type="text"] {
+.year-selector select {
     padding: 0.5rem 1rem;
     background: #1e1e1e;
     color: var(--text-color);
     border: 1px solid #2a2a2a;
+    border-radius: 4px;
     font-size: 1rem;
-    flex: 1;
-    max-width: 200px;
-}
-
-.habit-form input[type="color"] {
-    width: 50px;
-    height: 38px;
-    padding: 0 2px;
-    border: 1px solid #ddd;
-}
-
-.habit-form button {
-    padding: 0.5rem 1rem;
-    background: #3498db;
-    color: white;
-    border: none;
     cursor: pointer;
-    font-size: 1rem;
-}
-
-.habit-form button:hover {
-    background: #2980b9;
 }
 
 .habits-list {
@@ -268,29 +288,7 @@ h1, h2 {
     transform: scale(1.2);
 }
 
-.year-selector {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    justify-content: center;
-}
-
-.year-selector label {
-    color: var(--text-color);
-    font-size: 1rem;
-}
-
-.year-selector select {
-    padding: 0.5rem 1rem;
-    background: #1e1e1e;
-    color: var(--text-color);
-    border: 1px solid #2a2a2a;
-    border-radius: 4px;
-    font-size: 1rem;
-    cursor: pointer;
-}
-
+/* Modal backdrop */
 .modal {
     display: none;
     position: fixed;
@@ -298,80 +296,134 @@ h1, h2 {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.6); /* Darker backdrop for better focus */
     z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
+.modal.active {
+    display: block;
+    opacity: 1;
+}
+
+/* Modal content */
 .modal-content {
     background-color: var(--primary-bg);
     padding: 2rem;
-    border-radius: 8px;
+    border-radius: 12px; /* More rounded corners */
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     width: 400px;
     color: var(--text-color);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); /* Deeper shadow for a "floating" effect */
+    animation: slideIn 0.3s ease; /* Add a subtle animation */
 }
 
+/* Modal title */
 .modal-content h3 {
     margin-top: 0;
     margin-bottom: 1.5rem;
     color: var(--text-color);
+    font-weight: 600; /* Slightly bolder title */
+    font-size: 1.5rem;
+    text-align: center;
 }
 
+/* Form group styling */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+    font-size: 0.9rem;
+    opacity: 0.9; /* Slightly more visible label */
+    font-weight: 500; /* Medium weight for labels */
+}
+
+/* Input fields */
 .modal-content input[type="text"],
 .modal-content input[type="color"] {
     display: block;
     width: 100%;
-    margin: 1rem 0;
     padding: 0.75rem;
-    background: #1e1e1e;
-    border: 1px solid #2a2a2a;
+    background: var(--input-bg, #2a2a2a); /* Use a variable for input background */
+    border: 1px solid var(--input-border, #444); /* Use a variable for border color */
     color: var(--text-color);
-    border-radius: 4px;
+    border-radius: 8px; /* Rounded corners for inputs */
     box-sizing: border-box;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.modal-content input[type="text"]:focus {
+    border-color: #3498db;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2); /* Focus effect */
 }
 
 .modal-content input[type="color"] {
     height: 40px;
     padding: 4px;
+    cursor: pointer;
+    border-radius: 8px; /* Rounded corners for color input */
 }
 
+/* Modal buttons */
 .modal-buttons {
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-end; /* Align buttons to the right */
     gap: 1rem;
     margin-top: 2rem;
 }
 
 .modal-buttons button {
-    padding: 8px 16px;
-    border-radius: 4px;
+    padding: 10px 20px;
+    border-radius: 8px; /* Rounded corners for buttons */
     cursor: pointer;
     font-size: 0.9rem;
     transition: all 0.2s ease;
+    min-width: 100px;
+    font-weight: 500; /* Medium weight for button text */
 }
 
-#saveHabitChanges {
+#saveNewHabit {
     background-color: var(--success-color);
     color: white;
     border: none;
 }
 
-#saveHabitChanges:hover {
+#saveNewHabit:hover {
     background-color: #27ae60;
     transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Hover effect */
 }
 
-#cancelHabitEdit {
-    background-color: #e74c3c;
+#cancelNewHabit {
+    background-color: transparent;
+    color: var(--text-color);
+    border: 1px solid var(--input-border, #555);
+}
+
+#cancelNewHabit:hover {
+    background-color: var(--input-bg, #444); /* Use a variable for hover background */
     color: white;
-    border: none;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Hover effect */
 }
 
-#cancelHabitEdit:hover {
-    background-color: #c0392b;
-    transform: translateY(-1px);
+/* Animation for modal */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -60%);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
 }

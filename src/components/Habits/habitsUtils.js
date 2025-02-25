@@ -5,7 +5,7 @@ function calculateStreak(dates) {
     today.setHours(0, 0, 0, 0);
     
     const sortedDates = [...dates].sort((a, b) => {
-        const dateA = new Date(a + 'T00:00:00'); // Add time component to ensure local date
+        const dateA = new Date(a + 'T00:00:00');
         const dateB = new Date(b + 'T00:00:00');
         return dateB - dateA;
     });
@@ -101,10 +101,9 @@ function createYearGrid(habit, year) {
         if (dateStr === todayStr) {
             cell.classList.add('today');
             cell.addEventListener('click', async () => {
-                const result = await this.ipcRenderer.invoke('toggle-habit-date', {
+                const result = await ipcRenderer.invoke('toggle-habit-date', {
                     habitId: habit.id,
-                    date: dateStr,
-                    cellNumber: i + 1
+                    date: dateStr
                 });
     
                 if (result) {

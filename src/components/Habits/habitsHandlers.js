@@ -42,8 +42,8 @@ ipcMain.handle('add-habit', async (event, habit) => {
     }
 });
 
-ipcMain.handle('toggle-habit-date', async (event, { habitId, date, cellNumber }) => {
-    console.log('toggle-habit-date handler called:', { habitId, date, cellNumber });
+ipcMain.handle('toggle-habit-date', async (event, { habitId, date }) => {
+    console.log('toggle-habit-date handler called:', { habitId, date });
     const habits = loadHabits();
     const habit = habits.find(h => h.id === habitId);
     if (habit) {

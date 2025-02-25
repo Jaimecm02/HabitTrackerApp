@@ -15,11 +15,9 @@ class HabitTracker {
         console.log('Initializing HabitTracker');
         this.container.innerHTML = `
             <div class="habit-tracker">
-                <h2>HABIT TRACKER</h2>
-                <div class="habit-form">
-                    <input type="text" id="habitName" placeholder="Habit name">
-                    <input type="color" id="habitColor" value="#3498db">
-                    <button id="addHabit">Add Habit</button>
+                <div class="habit-tracker-header">
+                    <h2 class="habit-tracker-title">HABIT TRACKER</h2>
+                    <button class="add-habit-btn" id="addHabitBtn">+</button>
                 </div>
                 <div class="year-selector">
                     <label for="yearSelect">Select Year:</label>
@@ -27,11 +25,38 @@ class HabitTracker {
                 </div>
                 <div class="habits-list"></div>
             </div>
+            
+            <!-- New Habit Modal -->
+            <div id="newHabitModal" class="modal">
+                <div class="modal-content">
+                    <h3>New Habit</h3>
+                    <div class="form-group">
+                        <label for="habitName">Habit Name</label>
+                        <input type="text" id="habitName" placeholder="What would you like to track?">
+                    </div>
+                    <div class="form-group">
+                        <label for="habitColor">Color</label>
+                        <input type="color" id="habitColor" value="#3498db">
+                    </div>
+                    <div class="modal-buttons">
+                        <button id="saveNewHabit">Create</button>
+                        <button id="cancelNewHabit">Cancel</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Edit Habit Modal -->
             <div id="editHabitModal" class="modal">
                 <div class="modal-content">
                     <h3>Edit Habit</h3>
-                    <input type="text" id="editHabitName" placeholder="Habit name">
-                    <input type="color" id="editHabitColor">
+                    <div class="form-group">
+                        <label for="editHabitName">Habit Name</label>
+                        <input type="text" id="editHabitName" placeholder="Habit name">
+                    </div>
+                    <div class="form-group">
+                        <label for="editHabitColor">Color</label>
+                        <input type="color" id="editHabitColor">
+                    </div>
                     <div class="modal-buttons">
                         <button id="saveHabitChanges">Save</button>
                         <button id="cancelHabitEdit">Cancel</button>
@@ -48,7 +73,7 @@ class HabitTracker {
 
     bindEvents() {
         console.log('Binding events');
-        const addButton = this.container.querySelector('#addHabit');
+        const addButton = this.container.querySelector('#addHabitBtn');
         if (!addButton) {
             console.error('Add button not found');
             return;
@@ -56,8 +81,26 @@ class HabitTracker {
         
         addButton.addEventListener('click', () => {
             console.log('Add button clicked');
-            this.addHabit();
+            this.showNewHabitModal();
         });
+        
+        // New habit modal events
+        const newHabitModal = this.container.querySelector('#newHabitModal');
+        const saveNewHabitButton = newHabitModal.querySelector('#saveNewHabit');
+        const cancelNewHabitButton = newHabitModal.querySelector('#cancelNewHabit');
+        
+        saveNewHabitButton.addEventListener('click', () => this.addHabit());
+        cancelNewHabitButton.addEventListener('click', () => {
+            newHabitModal.classList.remove('active');
+            // Clear the form
+            newHabitModal.querySelector('#habitName').value = '';
+            newHabitModal.querySelector('#habitColor').value = '#3498db';
+        });
+    }
+    
+    showNewHabitModal() {
+        const modal = this.container.querySelector('#newHabitModal');
+        modal.classList.add('active');
     }
 
     async loadHabits() {
@@ -74,8 +117,9 @@ class HabitTracker {
         console.log('addHabit called');
         console.log('this.ipcRenderer:', this.ipcRenderer); // Debug line
         
-        const nameInput = this.container.querySelector('#habitName');
-        const colorInput = this.container.querySelector('#habitColor');
+        const modal = this.container.querySelector('#newHabitModal');
+        const nameInput = modal.querySelector('#habitName');
+        const colorInput = modal.querySelector('#habitColor');
         
         if (!nameInput.value.trim()) {
             return;
@@ -96,7 +140,11 @@ class HabitTracker {
             if (addedHabit) {
                 this.habits = [...this.habits, addedHabit];
                 this.renderHabits();
+                
+                // Reset and close the modal
                 nameInput.value = '';
+                colorInput.value = '#3498db';
+                modal.classList.remove('active');
             }
         } catch (error) {
             console.error('Error adding habit:', error);
@@ -157,7 +205,7 @@ class HabitTracker {
         const habitDiv = document.createElement('div');
         habitDiv.className = 'habit-item';
         habitDiv.dataset.habitId = habit.id; // Store the habit ID for reference
-        habitDiv.style.borderColor = `rgba(${this.hexToRgb(habit.color)}, 0.3)`;
+        habitDiv.style.borderColor = `rgba(${this.hexToRgb(habit.color)}, 0.1)`;
 
         const yearGrid = createYearGrid(habit, year); // Pass the selected year
         const currentStreak = calculateStreak(habit.dates);
@@ -253,7 +301,7 @@ class HabitTracker {
 
         nameInput.value = habit.name;
         colorInput.value = habit.color;
-        modal.style.display = 'block';
+        modal.classList.add('active');
 
         const cleanup = () => {
             saveButton.removeEventListener('click', handleSave);
@@ -281,12 +329,12 @@ class HabitTracker {
                     this.renderHabits();
                 }
             }
-            modal.style.display = 'none';
+            modal.classList.remove('active');
             cleanup();
         };
 
         const handleCancel = () => {
-            modal.style.display = 'none';
+            modal.classList.remove('active');
             cleanup();
         };
 
@@ -296,7 +344,7 @@ class HabitTracker {
                 if (success) {
                     this.habits = this.habits.filter(h => h.id !== habit.id);
                     this.renderHabits();
-                    modal.style.display = 'none';
+                    modal.classList.remove('active');
                     cleanup();
                 }
             }
