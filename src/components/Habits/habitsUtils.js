@@ -141,5 +141,6 @@ function hexToRgb(hex) {
 module.exports = {
     calculateStreak,
     getStreakLevel,
-    createYearGrid
+    createYearGrid,
+    hexToRgb
 };
