@@ -1,4 +1,4 @@
-class Analytics {
+class AnalyticsComponent {
     constructor(containerId, ipcRenderer) {
         this.container = document.getElementById(containerId);
         this.ipcRenderer = ipcRenderer;
@@ -337,4 +337,4 @@ class Analytics {
     }
 }
 
-module.exports = Analytics;
+module.exports = AnalyticsComponent;

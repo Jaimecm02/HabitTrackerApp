@@ -13,9 +13,9 @@ const HistoryCard = require('./UI/HistoryCard');
 const HeartButton = require('./UI/HeartButton');
 const Roulette = require('./UI/Roulette');
 
-class ColorComponent {
+class ColorsComponent {
     constructor() {
-        this.container = document.getElementById('colorComponent');
+        this.container = document.getElementById('colorsComponent');
         this.gemPattern = new GemPattern();
         this.webPattern = new WebPattern();
         this.chinesePattern = new ChinesePattern();
@@ -353,4 +353,4 @@ class ColorComponent {
 
 }
 
-module.exports = ColorComponent;
+module.exports = ColorsComponent;

@@ -2,7 +2,7 @@ const { calculateStreak, getStreakLevel, createYearGrid, hexToRgb } = require('.
 const NewHabitModal = require('./Modals/newHabitModal');
 const EditHabitModal = require('./Modals/editHabitModal');
 
-class HabitTracker {
+class HabitsComponent {
     constructor(containerId, ipcRenderer) {
         console.log('HabitTracker constructor called');
         console.log('Received ipcRenderer:', ipcRenderer); // Debug line
@@ -287,4 +287,4 @@ class HabitTracker {
     }
 }
 
-module.exports = HabitTracker;
+module.exports = HabitsComponent;

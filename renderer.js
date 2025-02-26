@@ -1,8 +1,8 @@
 const { ipcRenderer } = require('electron');
-const HabitTracker = require('./src/components/Habits/habitTracker');
-const Analytics = require('./src/components/Analytics/analytics');
-const ColorComponent = require('./src/components/Colors/ColorComponent');
-const WelcomePage = require('./src/components/WelcomePage/welcomePage');
+const HabitsComponent = require('./src/components/Habits/HabitsComponent');
+const AnalyticsComponent = require('./src/components/Analytics/AnalyticsComponent');
+const ColorsComponent = require('./src/components/Colors/ColorsComponent');
+const WelcomePageComponent = require('./src/components/WelcomePage/welcomePage');
 
 document.addEventListener('DOMContentLoaded', () => {
     // Load SVG icons
@@ -31,9 +31,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const components = {
-        habitComponent: null,
+        habitsComponent: null,
         analyticsComponent: null,
-        colorComponent: null,
+        colorsComponent: null,
         welcomeComponent: null,
     };
 
@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const contentSections = document.querySelectorAll('#content > div');
 
     // Initialize the welcomeComponent by default
-    components.welcomeComponent = new WelcomePage('welcomeComponent', ipcRenderer);
+    components.welcomeComponent = new WelcomePageComponent('welcomeComponent', ipcRenderer);
 
     // Handle navigation
     sidebarLinks.forEach(link => {
@@ -57,17 +57,17 @@ document.addEventListener('DOMContentLoaded', () => {
             // Initialize the component if it hasn't been loaded yet
             if (!components[target]) {
                 switch (target) {
-                    case 'habitComponent':
-                        components[target] = new HabitTracker(target, ipcRenderer);
+                    case 'habitsComponent':
+                        components[target] = new HabitsComponent(target, ipcRenderer);
                         break;
                     case 'analyticsComponent':
-                        components[target] = new Analytics(target, ipcRenderer);
+                        components[target] = new AnalyticsComponent(target, ipcRenderer);
                         break;
-                    case 'colorComponent':
-                        components[target] = new ColorComponent();
+                    case 'colorsComponent':
+                        components[target] = new ColorsComponent();
                         break;
                     case 'welcomeComponent':
-                        components[target] = new WelcomePage(target, ipcRenderer);
+                        components[target] = new WelcomePageComponent(target, ipcRenderer);
                         break;
                 }
             }

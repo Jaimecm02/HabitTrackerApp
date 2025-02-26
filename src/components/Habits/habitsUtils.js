@@ -95,15 +95,6 @@ function createYearGrid(habit, year) {
         
         cell.setAttribute('data-date', dateStr);
     
-        const dayNumber = document.createElement('span');
-        dayNumber.textContent = currentDate.getDate();
-        dayNumber.style.fontSize = '8px';
-        dayNumber.style.position = 'absolute';
-        dayNumber.style.top = '2px';
-        dayNumber.style.left = '2px';
-        dayNumber.style.color = 'rgba(255, 255, 255, 0.5)';
-        cell.appendChild(dayNumber);
-    
         // Handle cell coloring based on habit type
         if (habit.multipleCompletions) {
             // Check repetitions for multiple completions
