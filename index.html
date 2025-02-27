@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'">
@@ -16,6 +16,9 @@
             </symbol>
             <symbol id="icon-habits" viewBox="0 0 24 24">
                 <!-- Habits icon path -->
+            </symbol>
+            <symbol id="icon-sleep" viewBox="0 0 24 24">
+              <!-- Habits sleep path -->
             </symbol>
             <symbol id="icon-analytics" viewBox="0 0 24 24">
                 <!-- Analytics icon path -->
@@ -39,6 +42,11 @@
           </a>
         </li>
         <li>
+          <a id="nav-sleep" href="#sleepComponent">
+            <svg class="nav-icon"><use href="assets/icons.svg#icon-sleep"/></svg>
+          </a>
+        </li>
+        <li>
           <a id="nav-analytics" href="#analyticsComponent">
             <svg class="nav-icon"><use href="assets/icons.svg#icon-analytics"/></svg>
           </a>
@@ -55,6 +63,7 @@
     <div id="content">
       <div id="welcomeComponent"></div>
       <div id="habitsComponent" style="display: none;"></div>
+      <div id="sleepComponent" style="display: none;"></div>
       <div id="analyticsComponent" style="display: none;"></div>
       <div id="colorsComponent" style="display: none;"></div>
     </div>

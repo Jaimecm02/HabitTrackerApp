@@ -39,6 +39,12 @@ const createWindow = () => {
                 { role: 'zoomIn' },
                 { role: 'zoomOut' },
                 { type: 'separator' },
+                {
+                    label: 'Toggle Theme',
+                    click: () => {
+                        win.webContents.send('toggle-theme');
+                    }
+                }
             ]
         }
     ];

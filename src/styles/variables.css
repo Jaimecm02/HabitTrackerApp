@@ -10,12 +10,133 @@
     --success-color: #2ecc71;
     --card-border: 1px solid rgba(255, 255, 255, 0.03);
     --sidebar-bg: #0a0a0b;
+    --icon-color: #ffffff;
     --sidebar-border: rgba(255, 255, 255, 0.1);
     --gradient: linear-gradient(
         135deg,
         rgba(74, 158, 255, 0.5),
         rgba(217, 41, 255, 0.5)
     );
+
+    /* Streak colors */
+    --streak-bronze-bg: linear-gradient(to bottom, #6b4423, #2a2a2a);
+    --streak-bronze-border: #cd7f32;
+    --streak-bronze-shadow: 0 0 10px rgba(205, 127, 50, 0.1);
+
+    --streak-silver-bg: linear-gradient(to bottom, #707070, #2a2a2a);
+    --streak-silver-border: #c0c0c0;
+    --streak-silver-shadow: 0 0 10px rgba(192, 192, 192, 0.2);
+
+    --streak-gold-bg: linear-gradient(to bottom, #8b7355, #2a2a2a);
+    --streak-gold-border: #ffd700;
+    --streak-gold-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+
+    --streak-platinum-bg: linear-gradient(to bottom, #49567a, #2a2a2a);
+    --streak-platinum-border: #e5e4e2;
+    --streak-platinum-shadow: 0 0 20px rgba(229, 228, 226, 0.3);
+
+    --streak-diamond-bg: linear-gradient(to bottom, #6e85b2, #2a2a2a);
+    --streak-diamond-border: #b9f2ff;
+    --streak-diamond-shadow: 0 0 25px rgba(185, 242, 255, 0.3);
+
+    /* Habit Tracker specific colors */
+    --add-habit-btn-border: #3498db;
+    --add-habit-btn-hover-bg: #3498db;
+    --add-habit-btn-hover-color: white;
+    --add-habit-btn-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --add-habit-btn-hover-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+    --year-selector-bg: #1e1e1e;
+    --year-selector-border: #2a2a2a;
+
+    --habit-item-bg: var(--card-dark-bg);
+    --habit-item-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+    --delete-habit-bg: #e74c3c;
+    --delete-habit-hover-bg: #c0392b;
+
+    --edit-habit-btn-hover-border: rgba(255, 255, 255, 0.4);
+    --edit-habit-btn-hover-icon: #3498db;
+
+    --complete-today-btn-border: var(--success-color);
+    --complete-today-btn-hover-bg: var(--success-color);
+    --complete-today-btn-hover-color: white;
+
+    --day-cell-bg: #2a2a2a;
+    --day-cell-hover-scale: 1.2;
+    --day-cell-today-border: #fff;
+    --day-cell-today-scale: 0.9;
+
+    --counter-btn-border: var(--text-color);
+    --counter-btn-hover-bg: var(--text-color);
+    --counter-btn-hover-color: white;
+}
+
+[data-theme="light"] {
+    --primary-bg: #ffffff;
+    --card-bg: #f5f5f5;
+    --card-dark-bg: #e0e0e0;
+    --text-color: #000000;
+    --text-secondary: #666666;
+    --primary-color: #1a73e8;
+    --shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    --card-border: 1px solid rgba(0, 0, 0, 0.1);
+    --sidebar-bg: #ffffff;
+    --icon-color: #000000;
+    --sidebar-border: rgba(0, 0, 0, 0.1);
+
+    /* Light theme streak colors */
+    --streak-bronze-bg: linear-gradient(to bottom, #f4a460, #d2691e);
+    --streak-bronze-border: #cd7f32;
+    --streak-bronze-shadow: 0 0 10px rgba(205, 127, 50, 0.1);
+
+    --streak-silver-bg: linear-gradient(to bottom, #c0c0c0, #a9a9a9);
+    --streak-silver-border: #808080;
+    --streak-silver-shadow: 0 0 10px rgba(192, 192, 192, 0.2);
+
+    --streak-gold-bg: linear-gradient(to bottom, #ffd700, #daa520);
+    --streak-gold-border: #ffd700;
+    --streak-gold-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+
+    --streak-platinum-bg: linear-gradient(to bottom, #e5e4e2, #d3d3d3);
+    --streak-platinum-border: #c0c0c0;
+    --streak-platinum-shadow: 0 0 20px rgba(229, 228, 226, 0.3);
+
+    --streak-diamond-bg: linear-gradient(to bottom, #b9f2ff, #87ceeb);
+    --streak-diamond-border: #00bfff;
+    --streak-diamond-shadow: 0 0 25px rgba(185, 242, 255, 0.3);
+
+    /* Light theme Habit Tracker specific colors */
+    --add-habit-btn-border: #1a73e8;
+    --add-habit-btn-hover-bg: #1a73e8;
+    --add-habit-btn-hover-color: white;
+    --add-habit-btn-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --add-habit-btn-hover-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+    --year-selector-bg: #e0e0e0;
+    --year-selector-border: #c0c0c0;
+
+    --habit-item-bg: var(--card-dark-bg);
+    --habit-item-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    --delete-habit-bg: #e74c3c;
+    --delete-habit-hover-bg: #c0392b;
+
+    --edit-habit-btn-hover-border: rgba(0, 0, 0, 0.4);
+    --edit-habit-btn-hover-icon: #1a73e8;
+
+    --complete-today-btn-border: var(--success-color);
+    --complete-today-btn-hover-bg: var(--success-color);
+    --complete-today-btn-hover-color: white;
+
+    --day-cell-bg: #e0e0e0;
+    --day-cell-hover-scale: 1.2;
+    --day-cell-today-border: #000;
+    --day-cell-today-scale: 0.9;
+
+    --counter-btn-border: var(--text-color);
+    --counter-btn-hover-bg: var(--text-color);
+    --counter-btn-hover-color: white;
 }
 
 @font-face {

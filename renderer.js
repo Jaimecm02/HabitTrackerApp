@@ -1,5 +1,6 @@
 const { ipcRenderer } = require('electron');
 const HabitsComponent = require('./src/components/Habits/HabitsComponent');
+const SleepComponent = require('./src/components/Sleep/SleepComponent');
 const AnalyticsComponent = require('./src/components/Analytics/AnalyticsComponent');
 const ColorsComponent = require('./src/components/Colors/ColorsComponent');
 const WelcomePageComponent = require('./src/components/WelcomePage/welcomePage');
@@ -32,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const components = {
         habitsComponent: null,
+        sleepComponent: null,
         analyticsComponent: null,
         colorsComponent: null,
         welcomeComponent: null,
@@ -59,6 +61,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 switch (target) {
                     case 'habitsComponent':
                         components[target] = new HabitsComponent(target, ipcRenderer);
+                        break;
+                    case 'sleepComponent':
+                        components[target] = new SleepComponent(target, ipcRenderer);
                         break;
                     case 'analyticsComponent':
                         components[target] = new AnalyticsComponent(target, ipcRenderer);
@@ -100,4 +105,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 200);
 
     ipcRenderer.on('habits-updated', handleHabitsUpdated);
+
+    // Handle theme toggling
+    ipcRenderer.on('toggle-theme', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+    });
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
 });

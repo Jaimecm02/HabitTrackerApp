@@ -11,23 +11,23 @@ h1, h2 {
 }
 
 .habit-tracker-header {
-    position: relative; /* Make the header a positioning context */
+    position: relative;
     display: flex;
-    justify-content: center; /* Center the title */
-    align-items: center; /* Vertically center the title */
-    padding: 0 1rem; /* Add some padding to the sides */
-    margin-bottom: 2rem; /* Adjust margin as needed */
+    justify-content: center;
+    align-items: center;
+    padding: 0 1rem;
+    margin-bottom: 2rem;
 }
 
 .habit-tracker-title {
-    margin: 0; /* Remove default margin */
-    text-align: center; /* Ensure the title text is centered */
+    margin: 0;
+    text-align: center;
 }
 
 .add-habit-btn {
     background: transparent;
     color: var(--text-color);
-    border: 1px solid #3498db;
+    border: 1px solid var(--add-habit-btn-border);
     border-radius: 50%;
     width: 40px;
     height: 40px;
@@ -37,15 +37,15 @@ h1, h2 {
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    position: absolute; /* Position the button absolutely */
-    right: 1rem; /* Place the button on the right side */
+    box-shadow: var(--add-habit-btn-shadow);
+    position: absolute;
+    right: 1rem;
 }
 
 .add-habit-btn:hover {
-    background: #3498db;
-    color: white;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    background: var(--add-habit-btn-hover-bg);
+    color: var(--add-habit-btn-hover-color);
+    box-shadow: var(--add-habit-btn-hover-shadow);
 }
 
 .year-selector {
@@ -63,9 +63,9 @@ h1, h2 {
 
 .year-selector select {
     padding: 0.5rem 1rem;
-    background: #1e1e1e;
+    background: var(--year-selector-bg);
     color: var(--text-color);
-    border: 1px solid #2a2a2a;
+    border: 1px solid var(--year-selector-border);
     border-radius: 4px;
     font-size: 1rem;
     cursor: pointer;
@@ -81,10 +81,10 @@ h1, h2 {
 }
 
 .habit-item {
-    background: var(--card-dark-bg);
+    background: var(--habit-item-bg);
     padding: 1.5rem;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    box-shadow: var(--habit-item-shadow);
     overflow: visible;
     display: flex;
     flex-direction: column;
@@ -127,7 +127,7 @@ h1, h2 {
 }
 
 #deleteHabit {
-    background-color: #e74c3c;
+    background-color: var(--delete-habit-bg);
     color: white;
     border: none;
     margin-right: auto;
@@ -138,7 +138,7 @@ h1, h2 {
 }
 
 #deleteHabit:hover {
-    background-color: #c0392b;
+    background-color: var(--delete-habit-hover-bg);
 }
 
 .edit-habit-btn {
@@ -156,7 +156,7 @@ h1, h2 {
 }
 
 .edit-habit-btn:hover {
-    border: 1px solid rgba(255, 255, 255, 0.4);
+    border: 1px solid var(--edit-habit-btn-hover-border);
 }
 
 .edit-habit-btn svg {
@@ -167,14 +167,14 @@ h1, h2 {
 }
 
 .edit-habit-btn:hover svg {
-    fill: #3498db; /* Change icon color on hover */
+    fill: var(--edit-habit-btn-hover-icon);
 }
 
 .complete-today-btn {
     padding: 0.5rem 0.75rem;
     background: transparent;
     color: var(--success-color);
-    border: 1px solid var(--success-color);
+    border: 1px solid var(--complete-today-btn-border);
     cursor: pointer;
     font-size: 0.85rem;
     display: flex;
@@ -189,8 +189,8 @@ h1, h2 {
 }
 
 .complete-today-btn:hover {
-    background: var(--success-color);
-    color: white;
+    background: var(--complete-today-btn-hover-bg);
+    color: var(--complete-today-btn-hover-color);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
@@ -204,14 +204,12 @@ h1, h2 {
     border: 1px solid transparent;
 }
 
-/* Add a subtle check icon for completed state */
 .complete-today-btn.completed::before {
     content: "✓";
     margin-right: 4px;
     font-size: 0.9rem;
 }
 
-/* Grid container to wrap the year grid */
 .grid-container {
     background: var(--card-bg);
     border-radius: 8px;
@@ -241,7 +239,7 @@ h1, h2 {
     width: 75%;
     aspect-ratio: 1;
     border-radius: 2px;
-    background: #2a2a2a;
+    background: var(--day-cell-bg);
     cursor: pointer;
     transition: all 0.2s ease;
     position: relative;
@@ -256,14 +254,14 @@ h1, h2 {
 }
 
 .day-cell:hover {
-    transform: scale(1.2);
+    transform: scale(var(--day-cell-hover-scale));
     z-index: 1;
 }
 
 .day-cell[data-date]::after {
     content: attr(data-date);
     position: absolute;
-    background: #1e1e1e;
+    background: var(--card-dark-bg);
     padding: 4px 8px;
     border-radius: 4px;
     font-size: 12px;
@@ -274,7 +272,7 @@ h1, h2 {
     transition: opacity 0.2s;
     pointer-events: none;
     z-index: 10;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     left: 50%;
     transform: translateX(-50%);
     bottom: calc(100% + 5px);
@@ -283,12 +281,12 @@ h1, h2 {
 .day-cell.today {
     opacity: 1;
     pointer-events: auto;
-    border: 1px solid #fff;
-    transform: scale(0.9);
+    border: 1px solid var(--day-cell-today-border);
+    transform: scale(var(--day-cell-today-scale));
 }
 
 .day-cell.today:hover {
-    transform: scale(1.2);
+    transform: scale(var(--day-cell-hover-scale));
 }
 
 .counter {
@@ -300,7 +298,7 @@ h1, h2 {
 .counter-btn {
     background: transparent;
     color: var(--text-color);
-    border: 1px solid var(--text-color);
+    border: 1px solid var(--counter-btn-border);
     border-radius: 4px;
     width: 24px;
     height: 24px;
@@ -312,8 +310,8 @@ h1, h2 {
 }
 
 .counter-btn:hover {
-    background: var(--text-color);
-    color: white;
+    background: var(--counter-btn-hover-bg);
+    color: var(--counter-btn-hover-color);
 }
 
 .counter-value {

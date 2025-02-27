@@ -9,8 +9,6 @@ body {
     line-height: 1.6;
     text-align: center;
     display: flex;
-
-    
 }
 
 /* Sidebar styles */
@@ -50,12 +48,11 @@ body {
     color: var(--primary-color);
 }
 
-/* Replace .white-icon styles with new SVG icon styles */
 .nav-icon {
     width: 24px;
     height: 24px;
     fill: currentColor;
-    color: white;
+    color: var(--icon-color);
     transition: color 0.2s ease-in-out;
 }
 
@@ -75,8 +72,8 @@ body {
 
 /* Content styles */
 #content {
-    margin-left: 50px;  /* Adjusted margin to match fixed sidebar width */
-    width: calc(100% - 50px);  /* Adjusted width to be fluid */
+    margin-left: 50px;
+    width: calc(100% - 50px); 
 }
 
 /* Responsive adjustments */
